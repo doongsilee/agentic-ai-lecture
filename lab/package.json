@@ -10,13 +10,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "lab1": "tsx am/01-call.ts",
-    "lab2": "tsx am/02-chat.ts",
-    "lab3": "tsx am/03-tool-call.ts",
-    "lab4": "tsx am/04-one-round.ts",
-    "lab5": "tsx am/05-loop.ts",
-    "lab5:limit": "MAX_STEPS=1 tsx am/05-loop.ts",
-    "lab6": "tsx am/06-bonus.ts",
+    "agent": "tsx am/agent.ts",
+    "agent:limit": "MAX_STEPS=1 tsx am/agent.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
