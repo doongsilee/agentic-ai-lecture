@@ -1,7 +1,6 @@
 /**
- * 과제 4 정답 · 내 도구 만들기 — 과제 4 를 끝낸 시점의 lab/am/agent.ts
- *   find_substitute 도구를 새로 만든다: 설명 · 실행 함수 · runTool 한 줄. 루프는 그대로다
- *   PN-7730 재고 조회가 실패하면, 모델이 스스로 대체품(PN-7731)을 찾아 그 재고를 본다
+ * 실습 4 정답 · 루프 — 실습 4 를 끝낸 시점의 lab/am/agent.ts
+ *   재고 도구를 하나 더 주고, 한 바퀴를 while(for) 로 감싼다. 멈추는 길은 둘: 도구 요청이 없을 때 · MAX_STEPS
  */
 import { readFileSync } from "node:fs";
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
@@ -25,23 +24,13 @@ const tools = [
       parameters: { type: "object", properties: { part_no: { type: "string", description: "부품번호. 예: PN-4471" } }, required: ["part_no"] },
     },
   },
-  {
-    type: "function",
-    function: {
-      name: "find_substitute",
-      description: "재고 조회에 실패한 부품번호의 대체품(바뀐 부품번호)을 찾는다. 대체품이 있으면 그 번호로 다시 재고를 확인한다.",
-      parameters: { type: "object", properties: { part_no: { type: "string", description: "조회에 실패한 부품번호. 예: PN-7730" } }, required: ["part_no"] },
-    },
-  },
 ];
 
 const plans = JSON.parse(readFileSync(new URL("../../data/maintenance-plans.json", import.meta.url), "utf8"));
 const stock = JSON.parse(readFileSync(new URL("../../data/parts-stock.json", import.meta.url), "utf8"));
-const substitutes = JSON.parse(readFileSync(new URL("../../data/substitutes.json", import.meta.url), "utf8"));
 function runTool(name: string, args: any) {
   if (name === "get_maintenance_plan") return plans[args.tail_no] ? { tail_no: args.tail_no, ...plans[args.tail_no] } : { error: `'${args.tail_no}' 의 정비 계획이 없습니다` };
   if (name === "check_stock") return stock[args.part_no] ? { part_no: args.part_no, ...stock[args.part_no] } : { error: `'${args.part_no}' 는 재고 시스템에 없는 부품번호입니다 (재고 0 이 아니라 조회 실패)` };
-  if (name === "find_substitute") return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };
   return { error: `모르는 도구: ${name}` }; // 실패도 결과로 돌려준다
 }
 

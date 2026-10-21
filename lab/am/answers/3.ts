@@ -1,12 +1,11 @@
 /**
- * 과제 3 정답 · 루프 — 과제 3 을 끝낸 시점의 lab/am/agent.ts
- *   재고 도구를 하나 더 주고, 한 바퀴를 while(for) 로 감싼다. 멈추는 길은 둘: 도구 요청이 없을 때 · MAX_STEPS
+ * 실습 3 정답 · 도구 하나로 한 바퀴 — 실습 3 을 끝낸 시점의 lab/am/agent.ts
+ *   ① 도구를 알려 주고 → ② 모델이 요청하면 내 코드가 실행 → ③ 결과를 role: "tool" 로 넣어 다시 부른다
  */
 import { readFileSync } from "node:fs";
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
 
-const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
-
+// 도구 설명 — 모델은 이것만 보고 고른다
 const tools = [
   {
     type: "function",
@@ -16,57 +15,43 @@ const tools = [
       parameters: { type: "object", properties: { tail_no: { type: "string", description: "기체번호. 예: TR-1023" } }, required: ["tail_no"] },
     },
   },
-  {
-    type: "function",
-    function: {
-      name: "check_stock",
-      description: "부품번호로 지금 창고 재고 수량과 입고 예정일을 조회한다. 정비에 필요한 부품이 충분한지 확인할 때 쓴다. 부품마다 한 번씩 부른다.",
-      parameters: { type: "object", properties: { part_no: { type: "string", description: "부품번호. 예: PN-4471" } }, required: ["part_no"] },
-    },
-  },
 ];
 
+// 도구 실행 — 평범한 함수
 const plans = JSON.parse(readFileSync(new URL("../../data/maintenance-plans.json", import.meta.url), "utf8"));
-const stock = JSON.parse(readFileSync(new URL("../../data/parts-stock.json", import.meta.url), "utf8"));
-function runTool(name: string, args: any) {
-  if (name === "get_maintenance_plan") return plans[args.tail_no] ? { tail_no: args.tail_no, ...plans[args.tail_no] } : { error: `'${args.tail_no}' 의 정비 계획이 없습니다` };
-  if (name === "check_stock") return stock[args.part_no] ? { part_no: args.part_no, ...stock[args.part_no] } : { error: `'${args.part_no}' 는 재고 시스템에 없는 부품번호입니다 (재고 0 이 아니라 조회 실패)` };
-  return { error: `모르는 도구: ${name}` }; // 실패도 결과로 돌려준다
+function getMaintenancePlan(tail_no: string) {
+  return plans[tail_no] ? { tail_no, ...plans[tail_no] } : { error: `'${tail_no}' 의 정비 계획이 없습니다` };
 }
 
 async function chat(messages: object[]) {
   const res = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
-    body: JSON.stringify({ model: MODEL, messages, tools, temperature: 0.2 }),
+    body: JSON.stringify({ model: MODEL, messages, tools, temperature: 0.2 }), // tools 도 같이 보낸다
   });
   const data = await res.json();
   console.log(`[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`);
   const { role, content, tool_calls } = data.choices[0].message;
-  return { role, content, tool_calls };
+  return { role, content, tool_calls }; // 다시 보낼 건 role · content · tool_calls 뿐
 }
 
 const messages: object[] = [
-  { role: "system", content: "너는 공군 정비대대의 부품 담당이다. 오늘은 2026-10-29 이다. 기체번호를 받으면 정비 계획을 보고, 필요한 부품마다 재고를 확인하라. 도구로 확인한 사실만 짧게 답하고, 부족한 부품은 정비일까지 확보되는지 말하라." },
-  { role: "user", content: "TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?" },
+  { role: "system", content: "너는 공군 정비대대의 부품 담당이다. 도구로 확인한 사실만 짧게 답한다." },
+  { role: "user", content: "TR-1023 다음 정기 정비 계획 알려 줘" },
 ];
 
-for (let step = 1; ; step++) {
-  const reply = await chat(messages);
-  messages.push(reply);
+// ① 모델이 도구를 요청한다
+const reply = await chat(messages);
+messages.push(reply);
 
-  if (!reply.tool_calls?.length) { // ① 모델이 "끝"
-    console.log("[답]  ", reply.content);
-    break;
-  }
-  if (step >= MAX_STEPS) { // ② 내 코드가 "그만"
-    console.log(`[STOP] 모델을 ${step}번 불렀다. 내 코드가 멈춘다`);
-    break;
-  }
-
-  for (const call of reply.tool_calls) {
-    const result = runTool(call.function.name, JSON.parse(call.function.arguments));
-    console.log(`[TOOL] ${call.function.name}(${call.function.arguments}) →`, JSON.stringify(result));
-    messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
-  }
+// ② 실행은 내 코드가 한다. 결과는 tool_call_id 로 짝지어 돌려준다
+for (const call of reply.tool_calls ?? []) {
+  const args = JSON.parse(call.function.arguments); // arguments 는 JSON "글자"
+  const result = getMaintenancePlan(args.tail_no);
+  console.log(`[TOOL] ${call.function.name}(${call.function.arguments}) →`, JSON.stringify(result));
+  messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
 }
+
+// ③ 결과를 보고 답한다
+const final = await chat(messages);
+console.log("[답]  ", final.content);
