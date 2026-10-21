@@ -1,0 +1,11 @@
+# 참고용 옛 실습 (자체 .git 이 있어 레포에 넣지 않는다)
+lab-legacy/
+
+# 실습 환경
+node_modules/
+.env
+.DS_Store
+
+# 개인 편집기 설정
+.claude/
+*.code-workspace

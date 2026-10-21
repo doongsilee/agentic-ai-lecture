@@ -1,0 +1,30 @@
+{
+  "name": "agentic-ai-day1-lab",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@12.6.0",
+  "description": "공군 Agentic AI 교육 1일차 오전 실습 — 프레임워크 없이 Agent 만들기",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lab1": "tsx am/01-call.ts",
+    "lab2": "tsx am/02-chat.ts",
+    "lab3": "tsx am/03-tool-call.ts",
+    "lab4": "tsx am/04-one-round.ts",
+    "lab5": "tsx am/05-loop.ts",
+    "lab5:limit": "MAX_STEPS=1 tsx am/05-loop.ts",
+    "lab6": "tsx am/06-bonus.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

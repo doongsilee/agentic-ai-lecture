@@ -1,0 +1,14 @@
+// .devcontainer/devcontainer.json — 1일차 실습 환경 (GitHub Codespaces · VS Code Dev Containers 공용)
+//   교육생은 아무것도 설치하지 않는다. Node 22 상자를 만들고 lab/ 에 패키지 설치와 .env 만들기까지 해 준다
+//   비밀값(조별 키)은 여기 넣지 않는다 → lab/.env 또는 Codespaces Secrets
+{
+  "name": "공군 Agentic AI 1일차 실습",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "hostRequirements": { "cpus": 2 },
+  "containerEnv": { "TZ": "Asia/Seoul", "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0" },
+  "postCreateCommand": "sudo corepack enable && cd lab && corepack install && pnpm install --frozen-lockfile && ([ -f .env ] || cp .env.example .env) && echo '준비 끝. cd lab && pnpm lab1'",
+  "customizations": {
+    "vscode": { "settings": { "files.eol": "\n", "terminal.integrated.defaultProfile.linux": "bash", "terminal.integrated.cwd": "lab" } },
+    "codespaces": { "openFiles": ["lab/README.md", "lab/am/01-call.ts"] }
+  }
+}

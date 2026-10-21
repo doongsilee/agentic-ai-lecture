@@ -1,0 +1,104 @@
+/**
+ * 실습 6 · (보너스) 되돌리기 어려운 도구는 사람에게 묻고 실행한다              강의 20장 · 오후 interrupt 예고
+ *
+ *   할 일     request_part(부품 청구)를 실행하기 전에 ask() 로 담당자 승인을 받는다 (아래 ▼ 한 곳)
+ *             승인하지 않으면 실행하지 않고, 그 사실을 결과로 돌려준다
+ *   돌리기    pnpm lab6        (청구할까요? 에 y / n)
+ *   성공하면  [사람] PN-4471 1개를 청구할까요? → y 면 청구 접수, n 이면 모델이 "승인하지 않음" 을 보고 답한다
+ *             넣기 전에는 묻지 않고 바로 청구된다
+ *
+ * 무엇을 실행할지, 실행해도 되는지 정하는 것도 하네스(내 코드)의 일이다
+ */
+import { readFileSync } from "node:fs";
+import readline from "node:readline/promises";
+import { API_KEY, BASE_URL, MODEL } from "../lib/env.js";
+
+const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
+
+// 도구 설명 — 실습 5 의 두 개 + 청구
+const tools = [
+  {
+    type: "function",
+    function: {
+      name: "get_maintenance_plan",
+      description: "기체번호로 정기 정비 계획을 조회한다. 정비일과 필요한 부품번호 · 수량이 나온다.",
+      parameters: { type: "object", properties: { tail_no: { type: "string", description: "기체번호. 예: TR-1023" } }, required: ["tail_no"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "check_stock",
+      description: "부품번호로 지금 창고 재고 수량과 입고 예정일을 조회한다. 정비에 필요한 부품이 충분한지 확인할 때 쓴다. 부품마다 한 번씩 부른다.",
+      parameters: { type: "object", properties: { part_no: { type: "string", description: "부품번호. 예: PN-4471" } }, required: ["part_no"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "request_part",
+      description: "정비일까지 모자라는 부품을 상급 부대에 청구한다. 청구는 되돌리기 어렵다.",
+      parameters: {
+        type: "object",
+        properties: { part_no: { type: "string", description: "부품번호. 예: PN-4471" }, qty: { type: "number", description: "청구할 수량" } },
+        required: ["part_no", "qty"],
+      },
+    },
+  },
+];
+
+// 도구 실행 (교육용 합성 자료)
+const plans = JSON.parse(readFileSync(new URL("../data/maintenance-plans.json", import.meta.url), "utf8"));
+const stock = JSON.parse(readFileSync(new URL("../data/parts-stock.json", import.meta.url), "utf8"));
+let requests = 0;
+function runTool(name: string, args: any) {
+  if (name === "get_maintenance_plan") return plans[args.tail_no] ? { tail_no: args.tail_no, ...plans[args.tail_no] } : { error: `'${args.tail_no}' 의 정비 계획이 없습니다` };
+  if (name === "check_stock") return stock[args.part_no] ? { part_no: args.part_no, ...stock[args.part_no] } : { error: `'${args.part_no}' 는 재고 시스템에 없는 부품번호입니다 (재고 0 이 아니라 조회 실패)` };
+  if (name === "request_part") return { 청구번호: `REQ-${String(++requests).padStart(4, "0")}`, 부품번호: args.part_no, 수량: args.qty, 상태: "청구 접수" };
+  return { error: `모르는 도구: ${name}` };
+}
+
+// 사람에게 y / n 을 묻는다
+async function ask(question: string) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await rl.question(`[사람] ${question} (y/n) `);
+  rl.close();
+  return answer.trim().toLowerCase() === "y";
+}
+
+async function chat(messages: object[]) {
+  const res = await fetch(`${BASE_URL}/chat/completions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
+    body: JSON.stringify({ model: MODEL, messages, tools, temperature: 0.2 }),
+  });
+  const data = await res.json();
+  console.log(`[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`);
+  const { role, content, tool_calls } = data.choices[0].message;
+  return { role, content, tool_calls };
+}
+
+const messages: object[] = [
+  { role: "system", content: "너는 공군 정비대대의 부품 담당이다. 오늘은 2026-10-29 이다. 기체번호를 받으면 정비 계획을 보고, 필요한 부품마다 재고를 확인하라. 정비일까지 모자라는 부품은 청구한다. 도구로 확인한 사실만 짧게 답한다." },
+  { role: "user", content: "TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?" },
+];
+
+for (let step = 1; step <= MAX_STEPS; step++) {
+  const reply = await chat(messages);
+  messages.push(reply);
+  if (!reply.tool_calls?.length) {
+    console.log("[답]  ", reply.content);
+    break;
+  }
+
+  for (const call of reply.tool_calls) {
+    const args = JSON.parse(call.function.arguments);
+    let result;
+    // ▼ 실습 6: call.function.name 이 "request_part" 면 ask(`${args.part_no} ${args.qty}개를 청구할까요?`) 로 묻는다
+    //           승인하지 않으면(false) result = { 결과: "담당자가 청구를 승인하지 않았습니다" } — 실행하지 않는다
+    
+    result ??= runTool(call.function.name, args);
+    console.log(`[TOOL] ${call.function.name}(${call.function.arguments}) →`, JSON.stringify(result));
+    messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
+  }
+}
