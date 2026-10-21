@@ -466,6 +466,22 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
 .s17d .nbf span{font-size:20px;font-weight:600;color:var(--amber)}
 .s17d .nbf code{font-size:26px}
 .s17d .nbf em{font-style:normal;font-size:21px;color:var(--muted)}
+/* ── 실습 문제: 문제 → (→ 키) 정답 공개 ── */
+.body.task{gap:22px;justify-content:flex-start;padding-bottom:12px}
+.task .q{font-size:31px;line-height:1.45}.task .q b{color:var(--amber);font-weight:600}
+.task .give{display:grid;grid-template-columns:1fr 1fr;gap:24px;word-break:keep-all}
+.task .give .c{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 24px;min-width:0}
+.task .give small{font-size:18px;font-weight:600;color:var(--amber);letter-spacing:.04em}
+.task .give p{font-size:22px;line-height:1.5;color:var(--muted)}.task .give p b{color:var(--text);font-weight:600}
+.task .give pre{font-size:17px;line-height:1.45;padding:0;margin:0;background:none;border:none;white-space:pre-wrap;word-break:break-all}
+.task .give code{font-size:19px}
+.task .ans{flex:1;min-height:0;position:relative;border:1px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+.task .ans > span{font-size:18px;font-weight:600;color:var(--amber);padding:14px 24px 0;letter-spacing:.04em}
+.task .ans pre{border:none;background:none;font-size:17px;line-height:1.4;padding:6px 24px 12px}
+.task .ans pre .nw{color:var(--amber)}.task .ans pre .dim{color:#6B7686}
+.task .ans:not(.shown) > *{visibility:hidden}
+.task .ans:not(.shown)::after{content:"정답 · → 키를 누르면 공개";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--muted)}
+.task .ans.shown{border-style:solid;border-color:var(--amber);background:var(--panel)}
 @media (prefers-reduced-motion: reduce){#bar{transition:none}}
 </style>
 </head>
@@ -859,30 +875,205 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
   <div class="body slab"><div class="cards3">
 <div class="c"><small>① 키 넣기</small><b>lab/.env 두 줄</b><pre>LLM_MODE=cloud
 LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-32b (OpenRouter). 키가 없으면 mock 으로 흐름만 본다</p></div>
-<div class="c"><small>② 실습 파일</small><b>lab/am/agent.ts 하나</b><p>지금은 LLM 을 한 번 부르는 코드뿐이다. 과제마다 이 파일을 키워 간다</p><p>과제와 성공 화면은 <code>lab/README.md</code></p></div>
-<div class="c"><small>③ 막히면</small><b>answers 브랜치</b><p>GitHub 에서 브랜치를 answers 로 바꾸면 <code>lab/am/answers/1.ts ~ 4.ts</code> — 그 과제를 끝낸 시점의 agent.ts</p></div>
+<div class="c"><small>② 실습 파일</small><b>lab/am/agent.ts 하나</b><p>지금은 접속 정보를 찍는 한 줄뿐이다. 실습마다 이 파일을 키워 간다</p><p>문제와 성공 화면은 다음 장들과 <code>lab/README.md</code></p></div>
+<div class="c"><small>③ 막히면</small><b>answers 브랜치</b><p>GitHub 에서 브랜치를 answers 로 바꾸면 <code>lab/am/answers/1.ts ~ 5.ts</code> — 그 실습을 끝낸 시점의 agent.ts</p></div>
 </div>
 <pre class="out"><span class="dim">$ pnpm agent</span>
-{ role: 'assistant', content: '브레이크 패드는 정기 점검 때 두께를 재서 …' }
-{ prompt_tokens: 50, completion_tokens: 391, total_tokens: 441 }   <span class="dim">← 이게 보이면 준비 끝</span></pre></div>
+{ BASE_URL: 'https://openrouter.ai/api/v1', MODEL: 'qwen/qwen3-32b', '키': '있음' }   <span class="dim">← 이게 보이면 준비 끝 (키가 없으면 '없음 (mock)')</span></pre></div>
   <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
 </section>
 
 <section class="slide">
   <h1>실습: 프레임워크 없이 Agent 만들기</h1>
-  <div class="body slab"><div class="lab6 n5">
-<div class="c"><span class="no">1</span><b>대화 이어 가기</b><p>fetch 를 chat() 으로 묶고, 받은 답을 messages 에 넣어 이어서 묻기</p></div>
-<div class="c"><span class="no">2</span><b>도구 하나로 한 바퀴</b><p>get_maintenance_plan 을 만들고, tool_calls → 실행 → role: "tool" → 다시 부르기</p></div>
-<div class="c"><span class="no">3</span><b>루프</b><p>check_stock 을 더하고, while 로 감싸고, 멈추는 길 두 개</p></div>
-<div class="c"><span class="no">4</span><b>내 도구 만들기</b><p>find_substitute 를 직접 설계. 모델이 대체품을 찾아 재고를 다시 보면 성공</p></div>
-<div class="c bonus"><span class="no">+</span><b>사람 승인</b><p>(보너스) 청구 도구를 더하고, 실행 전에 y / n 묻기</p></div>
+  <div class="body slab"><div class="lab6">
+<div class="c"><span class="no">1</span><b>LLM 부르기</b><p>messages 를 직접 만들어 fetch 한 번</p></div>
+<div class="c"><span class="no">2</span><b>대화 이어 가기</b><p>받은 답을 messages 에 넣고 이어서 묻기</p></div>
+<div class="c"><span class="no">3</span><b>도구 하나로 한 바퀴</b><p>tool_calls → 실행 → role: "tool" → 다시 부르기</p></div>
+<div class="c"><span class="no">4</span><b>루프</b><p>도구를 하나 더 주고, 반복문과 멈추는 길 두 개</p></div>
+<div class="c"><span class="no">5</span><b>내 도구 만들기</b><p>find_substitute 를 직접 설계</p></div>
+<div class="c bonus"><span class="no">+</span><b>사람 승인</b><p>(보너스) 청구 전에 y / n 묻기</p></div>
 </div>
 <p class="take">lab/am/agent.ts 하나를 키워 간다 · 소재: 정비대대 부품 담당 Agent — <b>"TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?"</b></p></div>
   <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
 </section>
+
+<section class="slide">
+  <h1>실습 1 · LLM 부르기</h1>
+  <div class="body task"><p class="q">아래 두 문장으로 <b>messages 를 직접 만들고</b>, LLM 을 한 번 불러 보세요</p>
+<div class="give">
+<div class="c"><small>보낼 내용</small><p>모델에게 줄 역할 <b>"너는 공군 정비대대의 부품 담당이다. 짧게 답한다."</b></p><p>물어볼 것 <b>"브레이크 패드는 보통 언제 교체해?"</b></p><p>messages 는 <code>{ role, content }</code> 의 배열 · <b>POST</b> <code>${BASE_URL}/chat/completions</code> · 헤더 <code>Authorization: Bearer ${API_KEY}</code> · body 에 <code>model</code> 과 <code>messages</code></p></div>
+<div class="c"><small>성공하면</small><pre>{
+  role: 'assistant',
+  content: '일반적으로 3~5만 km 또는 2~3년 주기로 교체 권장 …'
+}
+{ prompt_tokens: 50, completion_tokens: 304, total_tokens: 354, … }</pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/1.ts</span><pre><span class="nw">const messages = [
+  { role: "system", content: "너는 공군 정비대대의 부품 담당이다. 짧게 답한다." },</span>   <span class="dim">// 역할 지시</span>
+  <span class="nw">{ role: "user", content: "브레이크 패드는 보통 언제 교체해?" },</span>                    <span class="dim">// 질문</span>
+<span class="nw">];
+
+const res = await fetch(`${BASE_URL}/chat/completions`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
+  body: JSON.stringify({ model: MODEL, messages, temperature: 0.2 }),
+});
+const data = await res.json();
+
+const { role, content } = data.choices[0].message;</span>   <span class="dim">// 답도 메시지 하나다</span>
+<span class="nw">console.log({ role, content });
+console.log(data.usage);</span>                            <span class="dim">// 이번 호출에 쓴 토큰 수</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 2 · 대화 이어 가기</h1>
+  <div class="body task"><p class="q">첫 답을 받은 뒤 <b>"방금 답한 내용을 한 줄로 줄여 줘"</b> 를 이어서 물어보세요</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① 실습 1 의 fetch 를 <code>chat(messages)</code> 함수로 묶는다</p><p>② 받은 답을 <code>messages</code> 에 넣고, 새 질문을 붙여 한 번 더 부른다</p><p>모델은 지난 대화를 기억하지 않는다. 기억은 messages 다</p></div>
+<div class="c"><small>성공하면</small><pre>[LLM]  보낸 messages 2개 · 입력 토큰 50
+[답]   일반적으로 10만~20만km 또는 패드 두께가 3mm 이하로 …
+[LLM]  보낸 messages 4개 · 입력 토큰 171
+[답]   주행거리 10~20만km 또는 두께 3mm 이하, 경고음 발생 시 즉시 교체.</pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/2.ts</span><pre><span class="nw">async function chat(messages: object[]) {</span>
+  const res = await fetch(…);                    <span class="dim">// 실습 1 의 fetch 그대로</span>
+  const data = await res.json();
+  <span class="nw">console.log(`[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`);</span>
+  const { role, content } = data.choices[0].message;
+  <span class="nw">return { role, content };</span>                       <span class="dim">// 다시 보낼 건 role · content 뿐</span>
+<span class="nw">}</span>
+
+<span class="nw">const first = await chat(messages);
+console.log("[답]  ", first.content);
+
+messages.push(first);</span>                            <span class="dim">// 모델이 한 말도 대화의 일부다</span>
+<span class="nw">messages.push({ role: "user", content: "방금 답한 내용을 한 줄로 줄여 줘" });
+
+const second = await chat(messages);
+console.log("[답]  ", second.content);</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 3 · 도구 하나로 한 바퀴</h1>
+  <div class="body task"><p class="q"><b>get_maintenance_plan</b> 도구를 주고, 모델이 요청하면 실행해서 돌려주세요 · 질문 <b>"TR-1023 다음 정기 정비 계획 알려 줘"</b></p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① 도구 설명(<code>tools</code>)과, <code>data/maintenance-plans.json</code> 에서 기체번호로 찾는 함수</p><p>② body 에 <code>tools</code> 를 같이 보내고, 답의 <code>tool_calls</code> 도 받는다</p><p>③ 실행 결과를 <code>role: "tool"</code> 로 넣고 다시 부른다</p></div>
+<div class="c"><small>성공하면</small><pre>[LLM]  보낸 messages 2개 · 입력 토큰 381
+[TOOL] get_maintenance_plan({"tail_no": "TR-1023"}) → {"정비일":"2026-11-03", …}
+[LLM]  보낸 messages 4개 · 입력 토큰 575
+[답]   200시간 정기 점검 · 2026년 11월 3일 · 필요 부품 4종 …</pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/3.ts</span><pre><span class="nw">const tools = [{ type: "function", function: {
+  name: "get_maintenance_plan",
+  description: "기체번호로 정기 정비 계획을 조회한다. 정비일과 필요한 부품번호 · 수량이 나온다.",
+  parameters: { type: "object", properties: { tail_no: { type: "string", description: "기체번호. 예: TR-1023" } }, required: ["tail_no"] },
+} }];
+function getMaintenancePlan(tail_no: string) {
+  return plans[tail_no] ? { tail_no, ...plans[tail_no] } : { error: `'${tail_no}' 의 정비 계획이 없습니다` };
+}</span>
+<span class="dim">// chat(): body 에 tools 추가 · return { role, content, tool_calls }</span>
+const reply = await chat(messages);
+<span class="nw">messages.push(reply);
+for (const call of reply.tool_calls ?? []) {
+  const args = JSON.parse(call.function.arguments);</span>          <span class="dim">// arguments 는 JSON "글자"</span>
+  <span class="nw">const result = getMaintenancePlan(args.tail_no);</span>           <span class="dim">// 실행은 내 코드가 한다</span>
+  <span class="nw">messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
+}
+const final = await chat(messages);</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 4 · 루프</h1>
+  <div class="body task"><p class="q"><b>check_stock</b> 도구를 더하고, 한 바퀴를 반복문으로 감싸세요 · 질문 <b>"TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?"</b></p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① <code>check_stock(part_no)</code> 도구 (<code>data/parts-stock.json</code>). 없는 번호는 error 를 결과로</p><p>② 멈추는 길 둘: 도구 요청이 없으면 답하고 끝 · <code>MAX_STEPS</code> 번 불렀으면 내 코드가 끊기</p></div>
+<div class="c"><small>성공하면</small><pre>[TOOL] get_maintenance_plan({"tail_no": "TR-1023"}) → …
+[TOOL] check_stock({"part_no": "PN-4471"}) → {"재고":1,"입고예정":"2026-11-06"}
+[TOOL] check_stock({"part_no": "PN-7730"}) → {"error":"… 조회 실패"}
+[답]   브레이크 패드 부족 · PN-7730 확보 여부 미상 …
+<span class="dim">$ pnpm agent:limit   → [STOP] 모델을 1번 불렀다</span></pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/4.ts</span><pre><span class="dim">// tools 에 check_stock 추가: "부품번호로 지금 창고 재고 수량과 입고 예정일을 조회한다. … 부품마다 한 번씩 부른다."</span>
+<span class="nw">function runTool(name: string, args: any) {
+  if (name === "get_maintenance_plan") return plans[args.tail_no] ? { … } : { error: "정비 계획이 없습니다" };
+  if (name === "check_stock") return stock[args.part_no] ? { … } : { error: "재고 시스템에 없는 부품번호 (조회 실패)" };
+  return { error: `모르는 도구: ${name}` };</span>                          <span class="dim">// 실패도 결과로 돌려준다</span>
+<span class="nw">}
+
+for (let step = 1; ; step++) {</span>
+  const reply = await chat(messages);
+  messages.push(reply);
+  <span class="nw">if (!reply.tool_calls?.length) { console.log("[답]  ", reply.content); break; }</span>        <span class="dim">// ① 모델이 "끝"</span>
+  <span class="nw">if (step >= MAX_STEPS) { console.log(`[STOP] 모델을 ${step}번 불렀다`); break; }</span>       <span class="dim">// ② 내 코드가 "그만"</span>
+  for (const call of reply.tool_calls) {
+    const result = <span class="nw">runTool(call.function.name, JSON.parse(call.function.arguments));</span>
+    messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
+  }
+<span class="nw">}</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 5 · 내 도구 만들기</h1>
+  <div class="body task"><p class="q">PN-7730 은 번호가 바뀐 부품이다. <b>find_substitute</b> 도구를 직접 설계해 더하세요 · 질문은 실습 4 그대로</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① 이름 · 설명 · 입력 모양 · 실행 함수 (<code>data/substitutes.json</code>) · runTool 한 줄</p><p>② 루프는 그대로. <b>설명을 어떻게 쓰면 모델이 알아서 쓸까</b> 가 핵심</p></div>
+<div class="c"><small>성공하면</small><pre>[TOOL] check_stock({"part_no": "PN-7730"}) → {"error":"… 조회 실패"}
+[TOOL] find_substitute({"part_no": "PN-7730"}) → {"대체품":"PN-7731", …}
+[TOOL] check_stock({"part_no": "PN-7731"}) → {"재고":3}
+[답]   PN-7730 → 대체품 PN-7731, 재고 3개 (충분) · PN-4471 만 부족</pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/5.ts</span><pre><span class="nw">{
+  type: "function",
+  function: {
+    name: "find_substitute",
+    description: "재고 조회에 실패한 부품번호의 대체품(바뀐 부품번호)을 찾는다. 대체품이 있으면 그 번호로 다시 재고를 확인한다.",
+    parameters: { type: "object", properties: { part_no: { type: "string", description: "조회에 실패한 부품번호. 예: PN-7730" } }, required: ["part_no"] },
+  },
+},</span>                                                   <span class="dim">// ↑ tools 배열에 하나 더</span>
+
+<span class="dim">// runTool 에 한 줄 더</span>
+<span class="nw">if (name === "find_substitute")
+  return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };</span>
+
+<span class="dim">// 루프는 한 글자도 안 바뀐다. 무엇을 언제 부를지는 모델이 설명을 보고 정한다</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>보너스 · 사람 승인</h1>
+  <div class="body task"><p class="q"><b>request_part</b> 청구 도구를 더하고, 실행 직전에 사람에게 y / n 을 물으세요</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① <code>request_part(part_no, qty)</code> 도구: 설명에 "되돌리기 어렵다" 를 적는다</p><p>② 실행 전에 터미널에서 묻는다 (<code>node:readline/promises</code>). 거절하면 실행하지 말고 그 사실을 결과로 돌려준다</p></div>
+<div class="c"><small>성공하면</small><pre>[TOOL] check_stock({"part_no": "PN-4471"}) → {"재고":1, …}
+[사람] PN-4471 1개를 청구할까요? (y/n) y
+[TOOL] request_part({"part_no":"PN-4471","qty":1}) → {"청구번호":"REQ-0001", …}
+[답]   … PN-4471 1개 청구 접수 (REQ-0001)</pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/bonus.ts</span><pre><span class="nw">async function ask(question: string) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await rl.question(`[사람] ${question} (y/n) `);
+  rl.close();
+  return answer.trim().toLowerCase() === "y";
+}</span>
+
+for (const call of reply.tool_calls) {
+  const args = JSON.parse(call.function.arguments);
+  <span class="dim">// 되돌리기 어려운 도구는 실행 전에 사람에게 묻는다. 거절하면 실행하지 않는다</span>
+  <span class="nw">const result =
+    call.function.name === "request_part" &amp;&amp; !(await ask(`${args.part_no} ${args.qty}개를 청구할까요?`))
+      ? { 결과: "담당자가 청구를 승인하지 않았습니다" }
+      : runTool(call.function.name, args);</span>
+  messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
+}</pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
 </div>
 <div id="bar"></div>
-<div id="hint">← → 이동 · O 전체보기 · F 전체화면</div>
+<div id="hint">← → 이동 (실습 장은 → 가 먼저 정답 공개) · O 전체보기 · F 전체화면</div>
 <div id="overview"><h2>전체보기 — 장을 누르면 그 장으로 (O 또는 Esc 로 닫기)</h2><div class="grid"></div></div>
 <script>
 const slides=[...document.querySelectorAll('#stage .slide')], N=slides.length;
@@ -891,17 +1082,18 @@ let cur=0;
 const stage=document.getElementById('stage'), ov=document.getElementById('overview'), bar=document.getElementById('bar');
 function fit(){const s=Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform=`translate(-50%,-50%) scale(${s})`;}
 function titleOf(s){const h=s.querySelector('h1, .ttl'); return h?h.textContent.trim():'';}
-function go(i, push=true){cur=Math.max(0,Math.min(N-1,i)); slides.forEach((s,k)=>s.classList.toggle('on',k===cur)); bar.style.width=((cur+1)/N*100)+'%'; if(push) history.replaceState(null,'','#'+(cur+1)); document.title=`${cur+1}/${N} · ${titleOf(slides[cur])}`;}
+function go(i, push=true){cur=Math.max(0,Math.min(N-1,i)); slides.forEach(s=>s.querySelectorAll('.ans.shown').forEach(a=>a.classList.remove('shown'))); slides.forEach((s,k)=>s.classList.toggle('on',k===cur)); bar.style.width=((cur+1)/N*100)+'%'; if(push) history.replaceState(null,'','#'+(cur+1)); document.title=`${cur+1}/${N} · ${titleOf(slides[cur])}`;}
+function next(){const a=slides[cur].querySelector('.ans:not(.shown)'); if(a) a.classList.add('shown'); else go(cur+1);}
 function openOverview(){const g=ov.querySelector('.grid'); g.innerHTML=''; slides.forEach((s,k)=>{const c=document.createElement('div'); c.className='cell'+(k===cur?' cur':''); const m=document.createElement('div'); m.className='mini'; const clone=s.cloneNode(true); clone.classList.add('on'); m.appendChild(clone); c.appendChild(m); const n=document.createElement('div'); n.className='n'; n.textContent=k+1; const t=document.createElement('div'); t.className='t'; t.textContent=titleOf(s); c.appendChild(t); c.appendChild(n); c.onclick=(e)=>{e.stopPropagation(); go(k); closeOverview();}; g.appendChild(c);}); ov.classList.add('on'); requestAnimationFrame(scaleCells); setTimeout(()=>{const cc=g.querySelector('.cell.cur'); cc&&cc.scrollIntoView({block:'center'});},0);}
 function scaleCells(){ov.querySelectorAll('.cell').forEach(c=>{const w=c.clientWidth; c.querySelector('.mini').style.transform=`scale(${w/1920})`;});}
 function closeOverview(){ov.classList.remove('on');}
-stage.addEventListener('click',(e)=>{const r=stage.getBoundingClientRect(); if(e.clientX < r.left + r.width/2) go(cur-1); else go(cur+1);});
+stage.addEventListener('click',(e)=>{const r=stage.getBoundingClientRect(); if(e.clientX < r.left + r.width/2) go(cur-1); else next();});
 ov.addEventListener('click',closeOverview);
 addEventListener('keydown',(e)=>{
   if(e.key==='o'||e.key==='O'){ov.classList.contains('on')?closeOverview():openOverview(); return;}
   if(e.key==='Escape'){closeOverview(); return;}
   if(ov.classList.contains('on')) return;
-  if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault(); go(cur+1);}
+  if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault(); next();}
   else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault(); go(cur-1);}
   else if(e.key==='Home') go(0); else if(e.key==='End') go(N-1);
   else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
