@@ -875,21 +875,18 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
   <div class="body slab"><div class="cards3">
 <div class="c"><small>① 키 넣기</small><b>lab/.env 두 줄</b><pre>LLM_MODE=cloud
 LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-32b (OpenRouter). 키가 없으면 mock 으로 흐름만 본다</p></div>
-<div class="c"><small>② 실습 파일</small><b>lab/am/agent.ts 하나</b><p>지금은 보낼 messages 뿐이다. 실습마다 이 파일을 키워 간다</p><p>문제와 성공 화면은 다음 장들과 <code>lab/README.md</code></p></div>
+<div class="c"><small>② 실습 파일</small><b>lab/am/agent.ts 하나</b><p>지금은 접속 정보를 찍는 한 줄뿐이다. 실습마다 이 파일을 키워 간다</p><p>문제와 성공 화면은 다음 장들과 <code>lab/README.md</code></p></div>
 <div class="c"><small>③ 막히면</small><b>answers 브랜치</b><p>GitHub 에서 브랜치를 answers 로 바꾸면 <code>lab/am/answers/1.ts ~ 5.ts</code> — 그 실습을 끝낸 시점의 agent.ts</p></div>
 </div>
 <pre class="out"><span class="dim">$ pnpm agent</span>
-보낼 messages: [
-  { role: 'system', content: '너는 공군 정비대대의 부품 담당이다. 짧게 답한다.' },
-  { role: 'user', content: '브레이크 패드는 보통 언제 교체해?' }
-] { BASE_URL: 'https://openrouter.ai/api/v1', MODEL: 'qwen/qwen3-32b', '키': '있음' }   <span class="dim">← 이게 보이면 준비 끝</span></pre></div>
+{ BASE_URL: 'https://openrouter.ai/api/v1', MODEL: 'qwen/qwen3-32b', '키': '있음' }   <span class="dim">← 이게 보이면 준비 끝 (키가 없으면 '없음 (mock)')</span></pre></div>
   <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
 </section>
 
 <section class="slide">
   <h1>실습: 프레임워크 없이 Agent 만들기</h1>
   <div class="body slab"><div class="lab6">
-<div class="c"><span class="no">1</span><b>LLM 부르기</b><p>주어진 messages 를 실어 fetch 한 번</p></div>
+<div class="c"><span class="no">1</span><b>LLM 부르기</b><p>messages 를 직접 만들어 fetch 한 번</p></div>
 <div class="c"><span class="no">2</span><b>대화 이어 가기</b><p>받은 답을 messages 에 넣고 이어서 묻기</p></div>
 <div class="c"><span class="no">3</span><b>도구 하나로 한 바퀴</b><p>tool_calls → 실행 → role: "tool" → 다시 부르기</p></div>
 <div class="c"><span class="no">4</span><b>루프</b><p>도구를 하나 더 주고, 반복문과 멈추는 길 두 개</p></div>
@@ -902,19 +899,21 @@ LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-3
 
 <section class="slide">
   <h1>실습 1 · LLM 부르기</h1>
-  <div class="body task"><p class="q">이 messages 를 실어 <b>LLM 을 한 번 부르는 코드</b>를 완성해 보세요</p>
+  <div class="body task"><p class="q">아래 두 문장으로 <b>messages 를 직접 만들고</b>, LLM 을 한 번 불러 보세요</p>
 <div class="give">
-<div class="c"><small>주어진 것 · lab/am/agent.ts</small><pre>const messages = [
-  { role: "system", content: "너는 공군 정비대대의 부품 담당이다. 짧게 답한다." },
-  { role: "user", content: "브레이크 패드는 보통 언제 교체해?" },
-];</pre><p><b>POST</b> <code>${BASE_URL}/chat/completions</code> · 헤더 <code>Authorization: Bearer ${API_KEY}</code> · body 에 <code>model</code> 과 <code>messages</code></p></div>
+<div class="c"><small>보낼 내용</small><p>모델에게 줄 역할 <b>"너는 공군 정비대대의 부품 담당이다. 짧게 답한다."</b></p><p>물어볼 것 <b>"브레이크 패드는 보통 언제 교체해?"</b></p><p>messages 는 <code>{ role, content }</code> 의 배열 · <b>POST</b> <code>${BASE_URL}/chat/completions</code> · 헤더 <code>Authorization: Bearer ${API_KEY}</code> · body 에 <code>model</code> 과 <code>messages</code></p></div>
 <div class="c"><small>성공하면</small><pre>{
   role: 'assistant',
   content: '일반적으로 3~5만 km 또는 2~3년 주기로 교체 권장 …'
 }
 { prompt_tokens: 50, completion_tokens: 304, total_tokens: 354, … }</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/am/answers/1.ts</span><pre><span class="nw">const res = await fetch(`${BASE_URL}/chat/completions`, {
+<div class="ans"><span>정답 · lab/am/answers/1.ts</span><pre><span class="nw">const messages = [
+  { role: "system", content: "너는 공군 정비대대의 부품 담당이다. 짧게 답한다." },</span>   <span class="dim">// 역할 지시</span>
+  <span class="nw">{ role: "user", content: "브레이크 패드는 보통 언제 교체해?" },</span>                    <span class="dim">// 질문</span>
+<span class="nw">];
+
+const res = await fetch(`${BASE_URL}/chat/completions`, {
   method: "POST",
   headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
   body: JSON.stringify({ model: MODEL, messages, temperature: 0.2 }),
