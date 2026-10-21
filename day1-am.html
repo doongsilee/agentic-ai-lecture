@@ -519,7 +519,7 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
 <div class="focus"><span>목표</span><p>LLM 자체가 아니라, LLM 을 활용한 AI Agent 개발을 <b>어플리케이션 레벨</b>에서 다룬다</p></div>
 <div class="g3"><span class="lb">오늘의 목표</span>
 <ol class="goals">
-  <li><b>AI Agent 가 무엇인지 안다</b><span>오전 · Agent · LLM · Tool 개념을 잡고, 프레임워크 없이 루프를 직접 짜 본다</span></li>
+  <li><b>AI Agent 가 무엇인지 안다</b><span>오전 · Agent · LLM · Tool 개념을 잡고, 첫 Agent 를 직접 짜 본다</span></li>
   <li><b>LangGraph 의 기초를 익힌다</b><span>오후 · 그 루프를 그래프로 옮기고, State · 사람 승인 · 메모리까지 다룬다</span></li>
 </ol></div>
 <div class="aud"><span class="lb">이 강의가 가정한 수강생</span><p>개발 경험이 있다. 코드를 읽고 고칠 수 있다 (TypeScript 는 처음이어도 괜찮다) · 딥러닝을 연구하는 분들도 있다</p><p class="small">모델 내부는 여러분이 더 잘 알 수 있다. 오늘은 모델 바깥, 모델을 감싸고 움직이는 코드를 본다</p></div>
@@ -531,7 +531,7 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
   <h1>오늘 일정</h1>
   <div class="body"><table class="tbl"><thead><tr><th>시간</th><th>블록</th><th>하는 일</th></tr></thead><tbody>
 <tr><td>10:00 ~ 10:50</td><td>Agent 기초</td><td>Agent · LLM · Tool 이 무엇인지, Thought → Action → Observation</td></tr>
-<tr><td>11:00 ~ 11:50</td><td>실습: 맨손 Agent</td><td>프레임워크 없이 TypeScript 로 Agent 루프를 직접 짠다</td></tr>
+<tr><td>11:00 ~ 11:50</td><td>실습: 첫 Agent 만들기</td><td>LLM 호출부터 도구 · 루프까지 TypeScript 로 직접 짠다</td></tr>
 <tr><td>13:00 ~ 13:50</td><td>LangGraph ①</td><td>오전에 짠 루프를 StateGraph 로 다시 짠다</td></tr>
 <tr><td>14:00 ~ 14:50</td><td>LangGraph ②</td><td>State 와 reducer: 노드가 돌려준 값이 어떻게 합쳐지나</td></tr>
 <tr><td>15:00 ~ 15:50</td><td>LangGraph ③</td><td>interrupt · checkpointer: 멈추고, 사람이 답하고, 이어서 돌리기</td></tr>
@@ -884,7 +884,7 @@ LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-3
 </section>
 
 <section class="slide">
-  <h1>실습: 프레임워크 없이 Agent 만들기</h1>
+  <h1>실습: 첫 Agent 만들기</h1>
   <div class="body slab"><div class="lab6">
 <div class="c"><span class="no">1</span><b>LLM 부르기</b><p>messages 를 직접 만들어 fetch 한 번</p></div>
 <div class="c"><span class="no">2</span><b>대화 이어 가기</b><p>받은 답을 messages 에 넣고 이어서 묻기</p></div>
