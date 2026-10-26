@@ -1,6 +1,6 @@
 # LLM 직접 불러 보기 · 시연 노트북
 
-TypeScript · Deno 커널로 도는 노트북 두 개.
+TypeScript · Deno 커널로 도는 노트북 네 개.
 
 ## llm-call.ipynb
 
@@ -23,6 +23,38 @@ TypeScript · Deno 커널로 도는 노트북 두 개.
 | ② | 실행은 우리 코드가 하고, 결과를 `tool` 메시지로 넣어 다시 부른다 | 20장 |
 | ③ | 지어낸 결과를 넣어도 LLM 은 그대로 믿는다 | 20장 |
 | ④ | `while` 로 감싸면 Agent 루프가 된다. 결과를 보고 다음 도구를 고르고, 모델이 "끝" 하거나 하네스가 "그만" 할 때 멈춘다 | 23 ~ 25장 |
+
+## graph-basics.ipynb
+
+강의 오후 ① 11 ~ 14장 (Academy 모듈 1 · L2 Simple Graph) 을 LangGraph 코드로 확인한다. `@langchain/langgraph` 버전은 2일차 저장소와 같다.
+
+| 칸 | 보여 주는 것 | 강의 장표 |
+| --- | --- | --- |
+| ① ~ ② | State 는 노드끼리 주고받는 칸, 노드는 바꾼 칸만 돌려주는 함수 | 오후 ① 9 ~ 10장 |
+| ③ ~ ⑤ | 조건부 엣지는 다음 노드 이름을 돌려주는 함수. 글에 따라 이메일 · IELTS 분석기로 갈린다 | 오후 ① 5 · 9장 |
+
+## tutor-agent.ipynb
+
+강의 오후 ① (Academy 모듈 1 · L4 ~ L6) 을 코드로 확인한다. 같은 영어 튜터 그래프를 한 단계씩 키운다. 접속 정보는 `lab/.env` (OpenRouter · `qwen/qwen3-32b`).
+
+| 칸 | 보여 주는 것 |
+| --- | --- |
+| ① Chain | 노드 하나가 LLM 을 부른다. 도구 요청은 오지만 실행할 노드가 없다 |
+| ② Router | 도구냐 답이냐를 모델이 고른다. 도구는 실행되지만 결과가 모델에게 가지 않는다 |
+| ③ Agent | `tools → tutor` 선 하나로 루프가 된다. 결과를 보고 최종 답을 낸다 |
+| 상한 | `recursionLimit` 에 걸리면 `GraphRecursionError` |
+
+## LangGraph Studio 로 보기 (강사 시연)
+
+`graph-basics.ipynb` · `tutor-agent.ipynb` 와 같은 그래프 네 개(simple · chain · router · agent)를 `lab/studio/graphs.ts` 에 두었다.
+
+```bash
+cd lab && pnpm studio     # localhost:2024 에 서버를 켜고 브라우저로 Studio 를 연다
+```
+
+- Studio 화면(smith.langchain.com)은 LangSmith 무료 계정 로그인이 필요하다. 서버 자체는 키 없이 뜬다
+- 입력: simple 은 `{ "text": "Dear Mr. Kim, ..." }`, 나머지는 `{ "question": "ubiquitous 뜻을 사전에서 찾아 줘" }`
+- 강의장 망에서 Studio 가 안 열릴 때를 대비해 화면 녹화를 준비해 둔다
 
 ## 공통
 

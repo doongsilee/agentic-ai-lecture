@@ -50,3 +50,25 @@ pnpm agent
 | `[답]` | 모델의 최종 답 |
 | `[STOP]` | 내 코드가 멈췄다 |
 | `[사람]` | 사람에게 물었다 |
+
+---
+
+# 1일차 오후 실습 — 오전 Agent 를 LangGraph 로
+
+13:00 ~ 13:50 (오후 ①) · 강의 시연(Chain → Router → Agent)을 오전의 정비 부품 Agent 로 직접 해 본다. `lab/pm/agent.ts` 파일 하나를 실습마다 키워 간다.
+
+도구 세 개 · `runTool` · `chat()` · 결과를 찍는 `show()` 는 오전에 만든 그대로 준비해 두었다. **그래프만 새로 만든다.**
+
+```bash
+pnpm pm          # 지금 상태 돌려 보기
+pnpm pm:limit    # 실습 9: MAX_STEPS=1 로 돌리기
+```
+
+| 실습 | 할 일 | 성공하면 |
+|---|---|---|
+| 6 · Chain | State (`messages` 칸 하나, 이어 붙이는 reducer) 와 agent 노드 하나로 START → agent → END 그래프를 만들고 `show(await graph.invoke(input))` | `[NODE] ▶ agent` 다음 `[끝] 마지막 메시지: assistant (도구 요청)` — 실행할 노드가 없다 |
+| 7 · Router | tools 노드(`runTool` 로 실행 → `role: "tool"`) 와 갈림길 `route` (도구 요청이면 `"tools"`, 아니면 `END`) 를 더한다. tools 다음은 END | `[TOOL] get_maintenance_plan(...)` 다음 `[끝] 마지막 메시지: tool` — 결과를 모델이 못 봤다 |
+| 8 · Agent | 선 **하나만** 바꿔서 도구 결과가 모델에게 돌아가게 한다 | 정비 계획 → 부품마다 재고 → 대체품 → `[답]` (오전 실습 5 와 같은 결과) |
+| 9 · 멈춤 | State 에 `steps` 칸(더하기)을 두고, agent 가 1 씩 더하고, route 에서 `MAX_STEPS` 면 END | `pnpm pm:limit` 이 `[STOP] 모델을 1번 불렀다` 로 조용히 끝난다 (recursionLimit 에러가 아니다) |
+
+힌트: 강의 시연 노트북 `demo/tutor-agent.ipynb` 와 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/6.ts ~ 9.ts`
