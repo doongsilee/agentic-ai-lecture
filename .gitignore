@@ -9,3 +9,4 @@ node_modules/
 # 개인 편집기 설정
 .claude/
 *.code-workspace
+slides/notes/

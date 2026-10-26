@@ -1,0 +1,14 @@
+{
+  "_notice": "오후 ① 시연용 LangGraph Studio 설정. pnpm studio 로 띄운다 — LangSmith 로그인 필요 (강사 시연용)",
+  "node_version": "22",
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "simple": "./studio/graphs.ts:simple",
+    "chain": "./studio/graphs.ts:chain",
+    "router": "./studio/graphs.ts:router",
+    "agent": "./studio/graphs.ts:agent"
+  },
+  "env": ".env"
+}

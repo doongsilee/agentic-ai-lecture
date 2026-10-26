@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic AI 1일차 오후 ③ — 멈추고 묻고 이어 가기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--bg:#0F141B;--panel:#161D26;--panel2:#1C2531;--text:#E7ECF2;--muted:#8C98A8;--amber:#F2B544;--line:#2A3542;--mag:#C97BDC;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans KR",system-ui,sans-serif;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center;cursor:pointer;user-select:none}
+.slide{position:absolute;inset:0;padding:72px 96px 64px;display:none;flex-direction:column;background:var(--bg)}
+.slide.on{display:flex}
+#stage.prerender .slide{display:flex;visibility:hidden}#stage.prerender .slide.on{visibility:visible}
+h1{font-size:54px;font-weight:600;line-height:1.2;letter-spacing:-0.01em;margin-bottom:34px;max-width:1700px}
+.body{flex:1;min-height:0;font-size:27px;line-height:1.5;display:flex;flex-direction:column;gap:18px}
+.body > *{flex:0 0 auto}
+footer{display:flex;justify-content:space-between;font-size:19px;color:var(--muted);padding-top:16px;border-top:1px solid var(--line)}
+footer .blk::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:10px;background:var(--amber)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start;min-height:0}
+.cols.r64{grid-template-columns:1.5fr 1fr}
+.cols > div{display:flex;flex-direction:column;gap:16px;min-width:0}
+pre{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 20px;font-size:18px;line-height:1.45;white-space:pre;overflow:hidden;color:#D5DBE3}
+pre .dim{color:#5B6676}pre .amber{color:var(--amber);font-weight:600}pre .mag{color:var(--mag);font-weight:600}
+.ok{border:1px solid var(--amber);border-radius:6px;padding:12px 18px;font-size:23px;line-height:1.45}
+.ok > span{display:block;color:var(--amber);font-size:17px;margin-bottom:4px}
+ul.list{list-style:none;display:flex;flex-direction:column;gap:12px}
+ul.list li{padding-left:26px;position:relative;font-size:25px;line-height:1.45}
+ul.list li::before{content:"";position:absolute;left:0;top:16px;width:10px;height:10px;border-radius:50%;background:var(--amber)}
+code{font-family:"IBM Plex Mono",monospace;font-size:0.92em;background:var(--panel2);padding:1px 7px;border-radius:4px;color:#E8D9A6}
+p{font-size:26px;line-height:1.5}p.small{font-size:20px;color:var(--muted);line-height:1.45}
+table.tbl{border-collapse:collapse;width:100%;font-size:22px;line-height:1.4}
+table.tbl th{text-align:left;color:var(--muted);font-weight:500;padding:8px 14px;border-bottom:1px solid var(--line);font-size:19px}
+table.tbl td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl td:first-child{font-weight:600;white-space:nowrap}
+table.tbl.plain td{border:none;padding:8px 18px 8px 0;font-size:26px}table.tbl.plain td:first-child{color:var(--amber)}
+.intro{display:flex;flex-direction:column;gap:22px;justify-content:center;flex:1}
+.intro .name{font-size:88px;font-weight:600;letter-spacing:-0.02em;line-height:1}
+.intro .career{font-size:32px;color:var(--muted)}.intro .mail{font-family:"IBM Plex Mono",monospace;font-size:26px;color:var(--amber);margin-top:16px}
+pre.mermaid{background:transparent;border:none;padding:0;display:flex;justify-content:center;align-items:flex-start;color:transparent;width:100%}
+pre.mermaid svg{width:100% !important;max-width:none !important;height:auto;max-height:560px}
+pre.mermaid svg text{fill:#E7ECF2 !important}pre.mermaid svg .edgeLabel text,pre.mermaid svg .edgeLabel tspan{fill:#B8C2CF !important}pre.mermaid svg .edgeLabel rect,pre.mermaid svg .labelBkg{fill:#0F141B !important;opacity:1}
+#bar{position:fixed;left:0;bottom:0;height:4px;background:var(--amber);width:0;transition:width .2s}
+#hint{position:fixed;right:18px;top:12px;font-size:13px;color:var(--muted);opacity:.7}
+#overview{position:fixed;inset:0;background:#0A0D12;display:none;overflow:auto;padding:36px 48px;z-index:10}
+#overview.on{display:block}
+#overview .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:22px}
+#overview .cell{position:relative;cursor:pointer;border:2px solid var(--line);border-radius:6px;overflow:hidden;background:var(--bg);aspect-ratio:16/9}
+#overview .cell.cur{border-color:var(--amber)}#overview .cell:hover{border-color:#fff}
+#overview .cell .mini{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;pointer-events:none}
+#overview .cell .mini .slide{display:flex}
+#overview .cell .n{position:absolute;right:8px;bottom:6px;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--amber);background:rgba(15,20,27,.85);padding:1px 7px;border-radius:3px}
+#overview .cell .t{position:absolute;left:0;right:0;bottom:0;padding:5px 9px;font-size:12px;color:var(--text);background:linear-gradient(transparent,rgba(15,20,27,.95) 40%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#overview h2{font-size:18px;color:var(--muted);font-weight:500;margin-bottom:18px}
+@media (prefers-reduced-motion: reduce){#bar{transition:none}}
+pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:block}
+.cmd{font-family:"IBM Plex Mono",monospace;font-size:24px;background:var(--panel2);border-left:4px solid var(--amber);padding:12px 20px;border-radius:0 6px 6px 0}
+.cmd .prompt{color:var(--amber);margin-right:10px}.cmd .note{color:var(--muted);font-size:19px;margin-left:18px}
+.placeholder{border:1px dashed var(--line);border-radius:6px;padding:30px 24px;color:var(--muted);text-align:center;font-size:21px;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="stage">
+<section class="slide">
+  <h1>되돌릴 수 없는 일은 누가 결정하나?</h1>
+  <div class="body"><div class="cols"><div><pre>[USER  ] 29일에 제2교육장에서 2시간짜리 교육을 잡을 수 있어?
+         되면 바로 예약까지 해 줘.
+[LLM   ] 3회째 호출 → 도구 요청 book_room
+<span class="mag">[WARN  ] 담당자에게 묻지 않고 승인했습니다</span>
+[TOOL  ] book_room(제2교육장 2026-10-29 16:00~18:00)
+         — 예약을 확정했습니다 (되돌릴 수 없음)
+[STATE ] 확정된 예약 1건</pre><p class="small">오늘 실습을 시작하기 전의 모습</p></div><div><ul class="list"><li>오전에 "마지막 버튼은 사람이 누른다" 고 했다. 지금은 모델이 혼자 눌렀다</li><li>while 문으로 사람에게 물으려면? 답이 올 때까지 프로그램을 켜 둔 채 기다려야 한다</li><li>담당자가 점심 먹고 와서 답하면? 그 사이 서버가 재시작되면?</li><li>필요한 것: <b>멈춘 자리를 저장</b>해 두고, 답이 오면 <b>그 자리부터 이어 가기</b></li></ul></div></div></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>멈췄다 이어 간다는 것</h1>
+  <div class="body"><pre class="mermaid">flowchart LR
+  A["agent: book_room 을 부르려 함"] --> P["approve: interrupt"]
+  P -- "State 를 저장하고 질문을 밖으로" --> H(("담당자"))
+  H -- "답 y 를 들고 같은 thread 로" --> P2["approve: 처음부터 다시, 이번엔 답을 받음"]
+  P2 --> T["tools: 예약 확정"]</pre><div class="cols"><div><ul class="list"><li>그래프는 멈출 때 State 를 저장소(checkpointer)에 남기고 <b>끝난다</b>. 프로그램이 기다리며 붙잡혀 있지 않다</li><li>질문은 <code>invoke</code> 결과의 <code>__interrupt__</code> 로 밖에 나온다</li></ul></div><div><ul class="list"><li>답이 오면 같은 대화 번호(thread_id)로 다시 <code>invoke</code> 한다</li><li>LangGraph 가 저장본에서 멈춘 노드를 찾아 거기서부터 이어 간다</li></ul></div></div></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>용어 네 개</h1>
+  <div class="body"><table class="tbl"><thead><tr><th>용어</th><th>뜻</th><th>코드</th></tr></thead><tbody>
+<tr><td>Checkpointer</td><td>단계가 끝날 때마다 State 를 저장하는 저장소</td><td><code>builder.compile({ checkpointer: new MemorySaver() })</code></td></tr>
+<tr><td>thread_id</td><td>어느 대화의 저장본인지 가리키는 번호</td><td><code>{ configurable: { thread_id: "booking-1" } }</code></td></tr>
+<tr><td>interrupt</td><td>여기서 멈추고 질문을 밖으로 내보낸다. 이어 가면 답을 돌려준다</td><td><code>const answer = interrupt({ 질문, 예약 })</code></td></tr>
+<tr><td>Command · resume</td><td>사람의 답을 들고 멈춘 자리로 돌아간다</td><td><code>graph.invoke(new Command({ resume: "y" }), config)</code></td></tr>
+</tbody></table><p class="small">interrupt 는 checkpointer 없이 쓸 수 없다. 저장할 곳이 없으면 멈춘 자리도 없다</p></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>오늘 그래프: 되돌릴 수 없는 일만 사람을 거친다</h1>
+  <div class="body"><div class="cols r64"><div><pre class="mermaid">flowchart LR
+  S(("START")) --> A["agent"]
+  A -- "조회 도구" --> T["tools"]
+  A -- "book_room" --> P["approve"]
+  A -- "끝" --> E(("END"))
+  P -- "y · 고친 시간" --> T
+  P -- "n" --> A
+  A -- "ask_user" --> Q["ask"]
+  Q --> A
+  T --> A</pre></div><div><ul class="list"><li>조회(get_schedule · get_maintenance)는 그냥 돌린다. 확정(book_room)만 approve 를 거친다</li><li>모델이 정보가 모자란다고 판단하면 ask_user 로 사람에게 되묻는다 (실습 17)</li><li>갈림길은 오후 ① 의 route 에 한 줄 더한 것: <code>book_room 이면 "approve"</code></li><li>거절(n)도 결과다. "담당자가 승인하지 않았다" 를 도구 결과로 붙여 agent 에게 돌려보낸다 (오전 "에러도 Observation")</li></ul></div></div></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>어디에 사람을 두나?</h1>
+  <div class="body"><div class="cols"><div><table class="tbl"><thead><tr><th>모양</th><th>누가 멈추나</th><th>언제</th><th>오늘</th></tr></thead><tbody>
+<tr><td>실행 전 승인</td><td>코드가 정한 자리</td><td>되돌릴 수 없는 일 앞</td><td>실습 13 ~ 16</td></tr>
+<tr><td>되묻기</td><td><b>모델이 판단</b>해서</td><td>꼭 필요한 정보가 없을 때</td><td>실습 17</td></tr>
+<tr><td>결과 검토</td><td>코드가 정한 자리</td><td>보내기 전에 초안을 보고 고칠 때</td><td>실습 16 (값 고치기)</td></tr>
+</tbody></table><div class="ok"><span>승인 피로</span>모든 도구에 승인을 걸면 담당자는 읽지 않고 y 를 누르게 된다. 위험도로 나눈다: 조회는 그냥 · 확정 · 취소 · 전송은 승인 · 범위가 크면 두 단계</div></div><div><pre>[WARN  ] 사람에게 되물을 방법이 없습니다
+[HUMAN ] 예약을 확정할까요? (y / n / …)
+         │ 예약 제2교육장 <span class="mag">2026-10-30</span> 09:00~11:00
+[HUMAN ] 담당자 답: y
+[STATE ] 확정된 예약 1건
+         │ 제2교육장 <span class="mag">2026-10-30</span> 09:00~11:00</pre><p class="small">날짜를 묻지 않은 질문에 모델이 날짜를 <b>추측</b>했다. 승인 질문에 날짜가 적혀 있었지만 담당자는 y 를 눌렀다</p><ul class="list"><li>승인은 안전장치지만, 사람이 읽어야 안전장치다</li><li>그래서 모델이 추측하지 않고 <b>먼저 묻게</b> 만드는 것도 사람을 두는 방법이다</li></ul></div></div></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>이어 가면 노드는 처음부터 다시 돈다</h1>
+  <div class="body"><div class="cols"><div><pre>async function approveNode(state) {
+  approveRuns++;                            <span class="dim">// ← 두 번 실행된다</span>
+  log("node", `▶ approve · 이 노드 ${approveRuns}번째 실행`);
+  const answer = interrupt({ 질문, 예약 });  <span class="dim">// 1번째: 여기서 멈춤</span>
+                                            <span class="dim">// 2번째: 여기서 답을 받음</span>
+  …
+}</pre><pre>[NODE  ] ▶ approve · 이 노드 1번째 실행
+[CHECK ] 그래프가 멈췄습니다 · 멈춘 자리 approve
+[HUMAN ] 예약을 확정할까요? (y / n)
+[NODE  ] ▶ approve · 이 노드 2번째 실행
+[HUMAN ] 담당자 답: y</pre></div><div><ul class="list"><li>저장되는 건 "노드 사이" 의 State 다. 노드 안 몇 번째 줄인지는 저장되지 않는다</li><li>그래서 이어 가면 그 노드를 <b>처음부터</b> 다시 돌리고, interrupt 줄에 오면 답을 돌려준다</li><li>interrupt 앞에 되돌릴 수 없는 일(메일 보내기, 예약)을 두면 <b>두 번 일어난다</b></li><li>그래서 approve 는 묻기만 하고, 확정은 다음 노드(tools)에서 한다</li></ul></div></div></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>thread_id 는 대화 번호다</h1>
+  <div class="body"><div class="cols"><div><pre>const config = { configurable: { thread_id: "booking-1" } };
+
+await graph.invoke(input, config);                   <span class="dim">// 멈춤</span>
+(await graph.getState(config)).next                  <span class="dim">// → ["approve"]</span>
+await graph.invoke(new Command({ resume: "y" }), config);  <span class="dim">// 이어 감</span>
+
+<span class="dim">// 다른 번호로 답하면?</span>
+await graph.invoke(new Command({ resume: "y" }),
+  { configurable: { thread_id: "other" } });         <span class="mag">// 아무 일도 안 일어난다</span></pre></div><div><ul class="list"><li>저장소 하나에 대화 여러 개가 thread_id 별로 따로 저장된다. 담당자 열 명이 각자 다른 예약을 승인할 수 있다</li><li><code>getState(config).next</code> 로 지금 어디서 멈춰 있는지 볼 수 있다</li><li>번호를 잃어버리면 이어 갈 방법이 없다. 실제 서비스에서는 이 번호를 DB 나 URL 에 들고 다닌다</li></ul></div></div></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>MemorySaver 는 메모리에만 저장한다</h1>
+  <div class="body"><table class="tbl"><thead><tr><th></th><th>저장 위치</th><th>프로그램을 끄면</th><th>언제</th></tr></thead><tbody>
+<tr><td><code>MemorySaver</code></td><td>프로그램 메모리</td><td>사라진다</td><td>오늘 · 개발 · 테스트</td></tr>
+<tr><td><code>SqliteSaver</code></td><td>파일 하나 (<code>checkpoints.sqlite</code>)</td><td>남아 있다. 껐다 켜도 같은 thread_id 로 이어 간다</td><td>내일 2일차</td></tr>
+<tr><td>Postgres 등</td><td>DB 서버</td><td>남아 있다. 서버 여러 대가 같이 쓴다</td><td>실제 서비스</td></tr>
+</tbody></table><p class="small">바꾸는 건 compile 의 한 줄뿐이다. 그래프 · 노드 · interrupt 코드는 그대로다</p></div>
+  <footer><span class="blk">이론 · 13분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습: 예약 확정 전에 담당자에게 묻기</h1>
+  <div class="body"><table class="tbl"><thead><tr><th>실습</th><th>할 일</th><th>비어 있으면</th><th>이게 보이면 성공</th></tr></thead><tbody>
+<tr><td>실습 13</td><td>approve 노드에서 <code>interrupt()</code> 로 묻기</td><td>아무에게도 안 묻고 예약이 확정된다</td><td>다음 실습의 에러가 보인다 (멈추려 했다는 뜻)</td></tr>
+<tr><td>실습 14</td><td>compile 에 checkpointer, 실행에 thread_id</td><td><code>GraphValueError: No checkpointer set</code></td><td><code>[CHECK] 그래프가 멈췄습니다 · 멈춘 자리 approve</code></td></tr>
+<tr><td>실습 15</td><td>답을 받아 <code>new Command({ resume })</code> 로 이어 가기</td><td>질문만 띄우고 끝. 예약 0건</td><td>y → 예약 1건 / n → 거절을 듣고 예약 0건</td></tr>
+<tr><td>실습 16</td><td>답이 시간이면 그 시간으로 고쳐서 승인</td><td>시간을 보냈는데 "거절" 로 처리된다</td><td><code>16:00~18:00 → 16:30~18:00</code> 으로 확정</td></tr>
+<tr><td>실습 17</td><td>모델이 ask_user 를 부르면 interrupt 로 되묻고, 답을 도구 결과로</td><td>날짜를 추측해서 2026-10-30 을 예약하려 든다</td><td><code>▶ ask · 모델이 되묻습니다</code> → 29일 로 예약</td></tr>
+</tbody></table><div class="cols"><div><div class="cmd"><span class="prompt">$</span> pnpm pm:3<span class="note">키보드로 y / n / 시간</span></div></div><div><div class="cmd"><span class="prompt">$</span> pnpm pm:3:yes<span class="note">· no · edit · ask</span></div></div></div><p class="small">파일: <code>labs/pm/approve.ts</code></p></div>
+  <footer><span class="blk">실습 · 30분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 13 · 확정 전에 멈추고 묻기</h1>
+  <div class="body"><div class="cols"><div><pre class="diff"><span class="del">- log("warn", "담당자에게 묻지 않고 승인했습니다 → 실습 13");</span><span class="del">- const answer = "y";</span><span class="add">+ const answer = interrupt({ 질문: "예약을 확정할까요? (y / n)", 예약 });</span></pre><ul class="list"><li>한 줄로 바뀐다. 그런데 돌려 보면 바로 에러가 난다</li><li>멈추려면 저장할 곳이 있어야 하기 때문이다 → 실습 14</li></ul></div><div><pre>[WARN  ] 담당자에게 묻지 않고 승인했습니다 → 실습 13
+[ANSWER] 29일 제2교육장 16:00~18:00 예약을 확정했습니다.
+[STATE ] 확정된 예약 1건</pre><p class="small">채우기 전 — 사람 없이 확정</p><pre>[STOP  ] GraphValueError: No checkpointer set
+         │ 멈췄다 이어 갈 저장소가 없다 → 실습 14
+[STATE ] 확정된 예약 0건</pre><p class="small">채운 뒤 — 멈추려 했는데 저장소가 없다</p></div></div></div>
+  <footer><span class="blk">실습 · 30분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 14 · 저장소와 대화 번호</h1>
+  <div class="body"><div class="cols"><div><pre class="diff"><span class="del">- const graph = builder.compile();</span><span class="del">- const config = {};</span><span class="add">+ const graph = builder.compile({ checkpointer: new MemorySaver() });</span><span class="add">+ const config = { configurable: { thread_id: `booking-${Date.now()}` } };</span></pre><ul class="list"><li>이제 그래프가 approve 에서 <b>멈추고 끝난다</b>. State 는 저장소에 남아 있다</li><li>아직 답을 들고 돌아가는 코드가 없다 → 실습 15</li></ul></div><div><pre>[CHECK ] 그래프가 멈췄습니다 · 멈춘 자리 approve
+         · thread_id booking-1791828364528
+         │ 저장된 State: messages 7개, steps 3
+[HUMAN ] 예약을 확정할까요? (y / n)
+         │ 예약 제2교육장 2026-10-29 16:00~18:00
+[WARN  ] 답을 받아 이어 가는 코드가 없어서 여기서 끝납니다
+[STATE ] 확정된 예약 0건</pre><p class="small">채운 뒤 — 멈춘 자리와 저장된 State 가 보인다</p></div></div></div>
+  <footer><span class="blk">실습 · 30분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 15 · 답을 들고 멈춘 자리로</h1>
+  <div class="body"><div class="cols"><div><pre class="diff"><span class="del">- log("warn", "답을 받아 이어 가는 코드가 없어서 여기서 끝납니다");</span><span class="del">- break;</span><span class="add">+ input = new Command({ resume: await askPerson(pending) });</span></pre><div class="cmd"><span class="prompt">$</span> pnpm pm:3:no</div><ul class="list"><li>루프가 다음 바퀴에서 <code>graph.invoke(input, config)</code> 를 다시 부른다. 같은 config 라서 멈춘 자리부터 이어진다</li><li>내일 2일차 빈칸 9 가 같은 한 줄이다</li></ul></div><div><pre>[HUMAN ] (미리 정한 답) y
+[NODE  ] ▶ approve · 이 노드 2번째 실행
+[TOOL  ] book_room(제2교육장 2026-10-29 16:00~18:00)
+[ANSWER] 29일 제2교육장 16:00~18:00 예약을 확정했습니다.
+[STATE ] 확정된 예약 1건</pre><p class="small">y — 승인하고 확정</p><pre>[HUMAN ] (미리 정한 답) n
+[NODE  ] ▶ approve · 이 노드 2번째 실행
+[NODE  ] ▶ agent · messages 8개
+[ANSWER] 담당자가 승인하지 않아 예약하지 않았습니다.
+         29일 제2교육장은 16:00~18:00 이 비어 있습니다.
+[STATE ] 확정된 예약 0건</pre><p class="small">n — 거절을 결과로 듣고 모델이 다시 답한다</p></div></div></div>
+  <footer><span class="blk">실습 · 30분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 16 · 담당자가 시간을 고쳐서 승인하기</h1>
+  <div class="body"><div class="cols"><div><pre class="diff"><span class="del">- // (시간 답을 처리하는 코드가 없다)</span><span class="add">+ const time = String(answer).trim();</span><span class="add">+ if (/^\d{2}:\d{2}~\d{2}:\d{2}$/.test(time)) return { override: time };</span></pre><pre><span class="dim">// State 에 미리 있는 칸 (덮어쓰기 — 지금 값 하나만 의미 있다)</span>
+override: Annotation&lt;string | undefined&gt;(),
+
+<span class="dim">// tools 노드: 고친 시간이 있으면 그걸로 확정</span>
+if (call.function.name === "book_room" &amp;&amp; state.override) args.시간 = state.override;</pre><div class="cmd"><span class="prompt">$</span> pnpm pm:3:edit<span class="note">답 16:30~18:00</span></div></div><div><pre>[HUMAN ] 담당자 답: 16:30~18:00
+[ANSWER] 담당자가 승인하지 않아 예약하지 않았습니다.
+[STATE ] 확정된 예약 0건</pre><p class="small">채우기 전 — 승인했는데 거절로 처리된다</p><pre>[HUMAN ] 담당자 답: 16:30~18:00
+[HUMAN ] 담당자가 고친 시간으로 확정합니다: 16:00~18:00 → 16:30~18:00
+[TOOL  ] book_room(제2교육장 2026-10-29 16:30~18:00)
+[ANSWER] 제2교육장 2026-10-29 16:30~18:00 예약을 확정했습니다.</pre><p class="small">채운 뒤 — 사람이 고친 값으로 확정된다</p><ul class="list"><li>interrupt 의 답은 y / n 만이 아니다. 사람이 <b>값을 고쳐서</b> 돌려보낼 수 있다</li><li>오후 ② 의 덮어쓰기 칸이 쓰이는 자리: "지금 승인된 시간" 하나만 의미 있다</li></ul></div></div></div>
+  <footer><span class="blk">실습 · 30분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 17 · 모델이 판단해서 사람에게 되묻기</h1>
+  <div class="body"><div class="cols"><div><pre class="diff"><span class="del">- log("warn", "사람에게 되물을 방법이 없습니다 → 실습 17");</span><span class="del">- return { messages: [{ role: "tool", tool_call_id: call.id,</span><span class="del">-   content: JSON.stringify({ error: "사람에게 물을 수 없습니다" }) }] };</span><span class="add">+ const 답 = interrupt({ 종류: "되묻기", 질문 });</span><span class="add">+ return { messages: [{ role: "tool", tool_call_id: call.id,</span><span class="add">+   content: JSON.stringify({ 답 }) }] };</span></pre><div class="cmd"><span class="prompt">$</span> pnpm pm:3:ask<span class="note">질문 2 · 날짜 없음</span></div><ul class="list"><li>ask_user 는 "실행하는" 도구가 아니다. 그래프를 멈추고, 사람 답을 그 도구의 <b>결과</b>로 돌려준다</li><li>승인은 코드가 정한 자리에서, 되묻기는 <b>모델이 판단해서</b> 멈춘다. 둘 다 같은 interrupt 다</li></ul></div><div><pre>[NODE  ] ▶ ask · 모델이 되묻습니다: 어느 날짜에 잡을까요?
+[CHECK ] 그래프가 멈췄습니다 · 멈춘 자리 ask · thread_id booking-…
+[HUMAN ] (미리 정한 답) 29일
+[LLM   ] 2회째 호출 → 도구 요청 get_schedule
+ …
+[CHECK ] 그래프가 멈췄습니다 · 멈춘 자리 approve · thread_id booking-…
+[HUMAN ] (미리 정한 답) y
+[ANSWER] 제2교육장 2026-10-29 16:00~18:00 예약을 확정했습니다.</pre><p class="small">채운 뒤 — 한 대화에서 두 번 멈춘다. thread_id 는 그대로</p><pre>[WARN  ] 사람에게 되물을 방법이 없습니다 → 실습 17
+[STATE ] 확정된 예약 1건
+         │ 제2교육장 2026-10-30 09:00~11:00</pre><p class="small">채우기 전 — 추측한 날짜로 확정</p></div></div></div>
+  <footer><span class="blk">실습 · 30분</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>오후 ③ 정리</h1>
+  <div class="body"><ul class="list">
+<li>되돌릴 수 없는 일 앞에는 사람을 둔다. 갈림길(route)에서 그 도구만 approve 로 보낸다</li>
+<li>사람의 답은 y / n 만이 아니다. 값을 고쳐서 돌려보내면 State 에 담아 그 값으로 실행한다</li>
+<li>되묻기도 같은 interrupt 다. 모델이 판단해서 멈추고, 사람 답이 도구 결과가 된다. 승인은 위험도로 골라 건다</li>
+<li>interrupt 로 멈추면 State 가 저장되고, 그래프는 끝난다. 아무도 기다리며 붙잡혀 있지 않다</li>
+<li>checkpointer = 저장소, thread_id = 대화 번호. 같은 번호로 Command({ resume }) 을 보내면 멈춘 자리부터 이어 간다</li>
+<li>이어 가면 그 노드는 처음부터 다시 돈다. interrupt 앞에 되돌릴 수 없는 일을 두지 않는다</li>
+<li>MemorySaver 는 끄면 사라진다. 내일은 파일에 저장하는 SqliteSaver 로 바꾼다</li>
+</ul><div class="ok"><span>다음</span>16:00 하루 정리 — 오늘 만든 Agent 를 처음부터 끝까지 돌려 보고, 흐름을 보고, 내일로 넘어간다</div></div>
+  <footer><span class="blk">정리 · 7분</span><span class="num"></span></footer>
+</section>
+
+
+
+</div>
+<div id="bar"></div>
+<div id="hint">← → 이동 · O 전체보기 · F 전체화면</div>
+<div id="overview"><h2>전체보기 — 장을 누르면 그 장으로 (O 또는 Esc 로 닫기)</h2><div class="grid"></div></div>
+<script>
+const slides=[...document.querySelectorAll('#stage .slide')], N=slides.length;
+slides.forEach((s,k)=>{const n=s.querySelector('footer .num'); if(n) n.textContent=`${k+1} / ${N}`;});
+let cur=0;
+const stage=document.getElementById('stage'), ov=document.getElementById('overview'), bar=document.getElementById('bar');
+function fit(){const s=Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform=`translate(-50%,-50%) scale(${s})`;}
+function go(i, push=true){cur=Math.max(0,Math.min(N-1,i)); slides.forEach((s,k)=>s.classList.toggle('on',k===cur)); bar.style.width=((cur+1)/N*100)+'%'; if(push) history.replaceState(null,'','#'+(cur+1)); document.title=`${cur+1}/${N} · ${slides[cur].querySelector('h1').textContent}`;}
+function openOverview(){const g=ov.querySelector('.grid'); g.innerHTML=''; slides.forEach((s,k)=>{const c=document.createElement('div'); c.className='cell'+(k===cur?' cur':''); const m=document.createElement('div'); m.className='mini'; const clone=s.cloneNode(true); clone.classList.add('on'); m.appendChild(clone); c.appendChild(m); const n=document.createElement('div'); n.className='n'; n.textContent=k+1; const t=document.createElement('div'); t.className='t'; t.textContent=s.querySelector('h1').textContent; c.appendChild(t); c.appendChild(n); c.onclick=(e)=>{e.stopPropagation(); go(k); closeOverview();}; g.appendChild(c);}); ov.classList.add('on'); requestAnimationFrame(scaleCells); setTimeout(()=>{const cc=g.querySelector('.cell.cur'); cc&&cc.scrollIntoView({block:'center'});},0);}
+function scaleCells(){ov.querySelectorAll('.cell').forEach(c=>{const w=c.clientWidth; c.querySelector('.mini').style.transform=`scale(${w/1920})`;});}
+function closeOverview(){ov.classList.remove('on');}
+stage.addEventListener('click',(e)=>{const r=stage.getBoundingClientRect(); if(e.clientX < r.left + r.width/2) go(cur-1); else go(cur+1);});
+ov.addEventListener('click',closeOverview);
+addEventListener('keydown',(e)=>{
+  if(e.key==='o'||e.key==='O'){ov.classList.contains('on')?closeOverview():openOverview(); return;}
+  if(e.key==='Escape'){closeOverview(); return;}
+  if(ov.classList.contains('on')) return;
+  if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault(); go(cur+1);}
+  else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault(); go(cur-1);}
+  else if(e.key==='Home') go(0); else if(e.key==='End') go(N-1);
+  else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+});
+addEventListener('resize',()=>{fit(); if(ov.classList.contains('on')) scaleCells();});
+addEventListener('hashchange',()=>{const n=(parseInt(location.hash.slice(1))||1)-1; if(n!==cur) go(n,false);});
+fit(); go((parseInt(location.hash.slice(1))||1)-1,false);
+if(window.mermaid){mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'loose',htmlLabels:false,flowchart:{curve:'linear',htmlLabels:false,padding:14,nodeSpacing:40,rankSpacing:50},themeVariables:{background:'#0F141B',primaryColor:'#1C2531',primaryTextColor:'#E7ECF2',primaryBorderColor:'#3A4553',lineColor:'#8C98A8',secondaryColor:'#161D26',tertiaryColor:'#161D26',edgeLabelBackground:'#0F141B',fontFamily:'IBM Plex Sans KR, sans-serif',fontSize:'20px'}}); stage.classList.add('prerender'); (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>mermaid.run({querySelector:'pre.mermaid'})).then(()=>{document.querySelectorAll('pre.mermaid').forEach(p=>p.style.color='inherit');}).finally(()=>stage.classList.remove('prerender'));}
+</script>
+</body>
+</html>
