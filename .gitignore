@@ -10,3 +10,6 @@ node_modules/
 .claude/
 *.code-workspace
 slides/notes/
+
+.claude/
+demo/

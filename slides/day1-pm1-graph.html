@@ -412,7 +412,7 @@ await graph.invoke({ text: "Dear Mr. Kim, ..." });                           <sp
 <div class="c"><span class="no">2</span><b>입력을 넣고 돌린다</b><p>글 한 줄을 넣으면, 지나간 노드에 불이 들어온다. 점선 중 어느 길로 갔는지 보인다</p></div>
 <div class="c"><span class="no">3</span><b>노드마다 State 를 본다</b><p>노드를 누르면 그 노드가 돌려준 칸과, 합쳐진 State 가 보인다</p></div>
 </div>
-<p class="cmdrow"><span>강사 화면</span><code>cd lab &amp;&amp; pnpm studio</code><span>LangSmith 무료 계정으로 로그인 · 그래프 네 개: simple · chain · router · agent</span></p></div>
+<p class="cmdrow"><span>강사 화면</span><code>cd demo/studio &amp;&amp; pnpm studio</code><span>LangSmith 무료 계정으로 로그인 · 그래프 네 개: simple · chain · router · agent</span></p></div>
   <footer><span class="blk">시연 · L3 Studio</span><span class="num"></span></footer>
 </section>
 
@@ -650,7 +650,7 @@ function route(state: typeof State.State) {
 <div class="c"><span class="no">1</span><b>LangGraph 가 무엇인지 배웠다</b><p>Agent 의 흐름을 그래프로 설계하고 실행하는 데 필요한 기능을 제공하는 도구. 그래프는 State · 노드 · 엣지로 이루어진다</p></div>
 <div class="c"><span class="no">2</span><b>LangGraph 로 기본 Agent 를 만들었다</b><p>Chain → Router → Agent 순서로 키웠다. 도구 결과를 모델에게 돌려보내는 선 하나가 Agent 를 만들고, 오전의 정비 부품 Agent 도 그렇게 옮겼다</p></div>
 </div>
-<p class="next"><span>다음 · 14:00</span>오후 ② State 와 reducer<em>노드가 돌려준 값이 State 에 어떻게 합쳐지나</em></p></div>
+<p class="next"><span>다음 · 14:00</span>오후 ② State 와 기억<em>State 에 값이 쌓이는 규칙을 정하고, 이어서 묻고, 길어진 대화를 다룬다</em></p></div>
   <footer><span class="blk">정리 · 5분</span><span class="num"></span></footer>
 </section>
 

@@ -533,9 +533,9 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
 <tr><td>10:00 ~ 10:50</td><td>Agent 기초</td><td>Agent · LLM · Tool 이 무엇인지, Thought → Action → Observation</td></tr>
 <tr><td>11:00 ~ 11:50</td><td>실습: 첫 Agent 만들기</td><td>LLM 호출부터 도구 · 루프까지 TypeScript 로 직접 구현한다</td></tr>
 <tr><td>13:00 ~ 13:50</td><td>LangGraph ①</td><td>오전에 만든 루프를 StateGraph 로 다시 구현한다</td></tr>
-<tr><td>14:00 ~ 14:50</td><td>LangGraph ②</td><td>State 와 reducer: 노드가 돌려준 값이 어떻게 합쳐지나</td></tr>
-<tr><td>15:00 ~ 15:50</td><td>LangGraph ③</td><td>interrupt · checkpointer: 멈추고, 사람이 답하고, 이어서 돌리기</td></tr>
-<tr><td>16:00 ~ 16:50</td><td>LangGraph ④</td><td>대화를 이어 가는 Agent: 메모리 · 요약 · 2일차 연결</td></tr>
+<tr><td>14:00 ~ 14:50</td><td>LangGraph ②</td><td>State 와 기억: reducer · checkpointer · 대화 이어 가기</td></tr>
+<tr><td>15:00 ~ 15:50</td><td>LangGraph ③</td><td>사람이 끼어들기: 진행 상황 보기 · 멈추기 · State 고치기</td></tr>
+<tr><td>16:00 ~ 16:50</td><td>LangGraph ④</td><td>스스로 멈추고 되돌아가기: interrupt · time travel · subgraph</td></tr>
 </tbody></table><p class="small">휴식 10:50 · 11:50 · 13:50 · 14:50 · 15:50 (10분씩) / 점심 12:00 ~ 13:00</p></div>
   <footer><span class="blk">오프닝 · 3분</span><span class="num"></span></footer>
 </section>
@@ -858,13 +858,12 @@ LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-3
 
 <section class="slide">
   <h1>실습: 첫 Agent 만들기</h1>
-  <div class="body slab"><div class="lab6">
+  <div class="body slab"><div class="lab6 n5">
 <div class="c"><span class="no">1</span><b>LLM 부르기</b><p>messages 를 직접 만들어 fetch 한 번</p></div>
 <div class="c"><span class="no">2</span><b>대화 이어 가기</b><p>받은 답을 messages 에 넣고 이어서 묻기</p></div>
 <div class="c"><span class="no">3</span><b>도구 하나로 한 바퀴</b><p>tool_calls → 실행 → role: "tool" → 다시 부르기</p></div>
 <div class="c"><span class="no">4</span><b>루프</b><p>도구를 하나 더 주고, 반복문과 멈추는 길 두 개</p></div>
 <div class="c"><span class="no">5</span><b>내 도구 만들기</b><p>find_substitute 를 직접 설계</p></div>
-<div class="c bonus"><span class="no">+</span><b>사람 승인</b><p>(보너스) 청구 전에 y / n 묻기</p></div>
 </div>
 <p class="take">lab/am/agent.ts 하나를 키워 간다 · 소재: 정비대대 부품 담당 Agent — <b>"TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?"</b></p></div>
   <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
@@ -1016,34 +1015,6 @@ for (let step = 1; ; step++) {</span>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
 </section>
 
-<section class="slide">
-  <h1>보너스 · 사람 승인</h1>
-  <div class="body task"><p class="q"><b>request_part</b> 청구 도구를 더하고, 실행 직전에 사람에게 y / n 을 물으세요</p>
-<div class="give">
-<div class="c"><small>할 일</small><p>① <code>request_part(part_no, qty)</code> 도구: 설명에 "되돌리기 어렵다" 를 적는다</p><p>② 실행 전에 터미널에서 묻는다 (<code>node:readline/promises</code>). 거절하면 실행하지 말고 그 사실을 결과로 돌려준다</p></div>
-<div class="c"><small>성공하면</small><pre>[TOOL] check_stock({"part_no": "PN-4471"}) → {"재고":1, …}
-[사람] PN-4471 1개를 청구할까요? (y/n) y
-[TOOL] request_part({"part_no":"PN-4471","qty":1}) → {"청구번호":"REQ-0001", …}
-[답]   … PN-4471 1개 청구 접수 (REQ-0001)</pre></div>
-</div>
-<div class="ans"><span>정답 · lab/am/answers/bonus.ts</span><pre><span class="nw">async function ask(question: string) {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  const answer = await rl.question(`[사람] ${question} (y/n) `);
-  rl.close();
-  return answer.trim().toLowerCase() === "y";
-}</span>
-
-for (const call of reply.tool_calls) {
-  const args = JSON.parse(call.function.arguments);
-  <span class="dim">// 되돌리기 어려운 도구는 실행 전에 사람에게 묻는다. 거절하면 실행하지 않는다</span>
-  <span class="nw">const result =
-    call.function.name === "request_part" &amp;&amp; !(await ask(`${args.part_no} ${args.qty}개를 청구할까요?`))
-      ? { 결과: "담당자가 청구를 승인하지 않았습니다" }
-      : runTool(call.function.name, args);</span>
-  messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
-}</pre></div></div>
-  <footer><span class="blk">실습</span><span class="num"></span></footer>
-</section>
 </div>
 <div id="bar"></div>
 <div id="hint">← → 이동 (실습 장은 → 가 먼저 정답 공개) · O 전체보기 · F 전체화면</div>

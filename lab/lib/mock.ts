@@ -6,6 +6,9 @@
  *   · 설명(description)이나 입력 모양(parameters)이 비어 있는 도구는 쓰지 못한다
  *   · 도구를 요청하고도 결과를 못 받으면 결과를 지어내 답한다 (당일 모델이 실제로 그랬다)
  *   · 정비 계획 → 부품마다 재고 → (조회 실패면) 대체 부품 → 대체품 재고 → (부족하면) 청구 → 답
+ *   · 기체번호 없이 "언제 들어와?" 를 물으면, 앞 대화에 있는 입고 예정으로 답한다 (없으면 기체번호를 묻는다)
+ *   · 청구가 거절되고 담당자 의견에 "N개" 가 있으면, 그 수량으로 한 번 다시 청구한다 (오후 ③ 실습 17)
+ *   · stream: true 로 부르면 같은 답을 SSE 줄로 나눠 보낸다 (mockStream)
  */
 import type { Msg, Tool, ToolCall } from "./llm.js";
 
@@ -31,6 +34,11 @@ export function mockChat(messages: Msg[], tools?: Tool[]): Msg {
   const got = (name: string) => results.filter((r) => r.name === name);
 
   const tail = question.toUpperCase().match(/[A-Z]{2}-\d{4}/)?.[0];
+  // 기체번호 없이 이어서 묻는 질문 (오후 ② 실습 10): 앞 대화에 확인한 입고 예정이 있으면 그걸로 답한다
+  if (!tail && /언제|들어와|입고/.test(question)) {
+    const due = messages.filter((m) => m.role === "tool").map((m) => parse(text(m))).filter((r) => r.입고예정);
+    if (due.length) return answer(due.map((r) => `${r.이름} ${r.part_no} 는 ${r.입고예정} 에 입고 예정입니다.`).join("\n"));
+  }
   if (!tail) return answer("정비 부품 담당입니다. 기체번호(예: TR-1023)를 알려 주시면 정비 계획과 부품 재고를 확인해 드립니다.");
   if (!usable.has("get_maintenance_plan")) return answer(`${tail} 의 정비 계획을 확인할 방법이 없어 답할 수 없습니다.`);
   if (!got("get_maintenance_plan").length) return want(call("get_maintenance_plan", { tail_no: tail }));
@@ -62,6 +70,12 @@ export function mockChat(messages: Msg[], tools?: Tool[]): Msg {
     return stock.get(p.부품번호).error && sub ? { ...stock.get(sub), via: sub } : stock.get(p.부품번호);
   };
   const short = parts.filter((p) => !have(p).error && Number(have(p).재고) < p.수량);
+  // 담당자가 청구를 거절하면서 수량을 적었으면 (오후 ③ 실습 17): 그 수량으로 한 번 다시 청구한다
+  const reqs = got("request_part");
+  const fix = reqs.at(-1)?.result.결과?.match(/담당자 의견:.*?(\d+)\s*개/);
+  if (usable.has("request_part") && fix && reqs.filter((r) => r.args.part_no === reqs.at(-1)!.args.part_no).length === 1) {
+    return want(call("request_part", { part_no: reqs.at(-1)!.args.part_no, qty: Number(fix[1]) }));
+  }
   if (usable.has("request_part") && short.length && !got("request_part").length) {
     return want(...short.map((p) => call("request_part", { part_no: p.부품번호, qty: p.수량 - Number(have(p).재고) })));
   }
@@ -83,6 +97,27 @@ export function mockChat(messages: Msg[], tools?: Tool[]): Msg {
     ...(requested.length ? ["청구:", ...requested] : []),
     ok ? "결론: 지금 재고로 정비할 수 있습니다." : "결론: 지금 재고로는 정비를 다 할 수 없습니다. 부족한 부품을 확보하거나 정비일을 조정해야 합니다.",
   ].join("\n"));
+}
+
+/** 정해진 답을 OpenAI 와 같은 SSE 줄로 나눠 보낸다. 글자는 몇 자씩, 도구 요청은 이름 → arguments 순서로 */
+export function mockStream(message: Msg): ReadableStream<Uint8Array> {
+  const deltas: object[] = [{ role: "assistant", content: "" }];
+  const content = text(message);
+  for (let i = 0; i < content.length; i += 3) deltas.push({ content: content.slice(i, i + 3) });
+  (message.tool_calls ?? []).forEach((c, index) => {
+    deltas.push({ tool_calls: [{ index, id: c.id, type: "function", function: { name: c.function.name, arguments: "" } }] });
+    deltas.push({ tool_calls: [{ index, function: { arguments: c.function.arguments } }] });
+  });
+  const lines = deltas.map((delta) => `data: ${JSON.stringify({ choices: [{ index: 0, delta }] })}\n\n`).concat("data: [DONE]\n\n");
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    async pull(controller) {
+      const line = lines.shift();
+      if (line === undefined) return controller.close();
+      await new Promise((r) => setTimeout(r, 20)); // 글자가 흘러나오는 게 보이게
+      controller.enqueue(encoder.encode(line));
+    },
+  });
 }
 
 /** 도구 없이 대화만 (과제 1) */
