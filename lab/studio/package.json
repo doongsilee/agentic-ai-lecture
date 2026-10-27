@@ -1,0 +1,24 @@
+{
+  "name": "agentic-ai-day1-answers-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "오후 실습 정답(lab/pm/answers/6 ~ 20)을 LangGraph Studio 에서 보기 (answers 브랜치 전용 · 강사 화면)",
+  "type": "module",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "studio": "node extract.mjs && langgraphjs dev --port 2024"
+  },
+  "dependencies": {
+    "@langchain/core": "1.2.14",
+    "@langchain/langgraph": "1.4.18",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@langchain/langgraph-cli": "1.5.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
