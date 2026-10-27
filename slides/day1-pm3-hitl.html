@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic AI 1일차 오후 ③ — 사람이 끼어들기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<style>
+:root{--bg:#0F141B;--panel:#161D26;--panel2:#1C2531;--text:#E7ECF2;--muted:#8C98A8;--amber:#F2B544;--line:#2A3542;--mag:#C97BDC;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans KR",system-ui,sans-serif;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center;cursor:pointer;user-select:none}
+.slide{position:absolute;inset:0;padding:72px 96px 64px;display:none;flex-direction:column;background:var(--bg)}
+.slide.on{display:flex}
+#stage.prerender .slide{display:flex;visibility:hidden}#stage.prerender .slide.on{visibility:visible}
+h1{font-size:54px;font-weight:600;line-height:1.2;letter-spacing:-0.01em;margin-bottom:34px;max-width:1700px}
+.body{flex:1;min-height:0;font-size:27px;line-height:1.5;display:flex;flex-direction:column;gap:18px}
+.body > *{flex:0 0 auto}
+footer{display:flex;justify-content:space-between;font-size:19px;color:var(--muted);padding-top:16px;border-top:1px solid var(--line)}
+footer .blk::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:10px;background:var(--amber)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start;min-height:0}
+.cols.r64{grid-template-columns:1.5fr 1fr}
+.cols > div{display:flex;flex-direction:column;gap:16px;min-width:0}
+pre{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 20px;font-size:18px;line-height:1.45;white-space:pre;overflow:hidden;color:#D5DBE3}
+pre .dim{color:#5B6676}pre .amber{color:var(--amber);font-weight:600}pre .mag{color:var(--mag);font-weight:600}
+.ok{border:1px solid var(--amber);border-radius:6px;padding:12px 18px;font-size:23px;line-height:1.45}
+.ok > span{display:block;color:var(--amber);font-size:17px;margin-bottom:4px}
+ul.list{list-style:none;display:flex;flex-direction:column;gap:12px}
+ul.list li{padding-left:26px;position:relative;font-size:25px;line-height:1.45}
+ul.list li::before{content:"";position:absolute;left:0;top:16px;width:10px;height:10px;border-radius:50%;background:var(--amber)}
+code{font-family:"IBM Plex Mono",monospace;font-size:0.92em;background:var(--panel2);padding:1px 7px;border-radius:4px;color:#E8D9A6}
+p{font-size:26px;line-height:1.5}p.small{font-size:20px;color:var(--muted);line-height:1.45}
+table.tbl{border-collapse:collapse;width:100%;font-size:22px;line-height:1.4}
+table.tbl th{text-align:left;color:var(--muted);font-weight:500;padding:8px 14px;border-bottom:1px solid var(--line);font-size:19px}
+table.tbl td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl td:first-child{font-weight:600;white-space:nowrap}
+table.tbl.plain td{border:none;padding:8px 18px 8px 0;font-size:26px}table.tbl.plain td:first-child{color:var(--amber)}
+.intro{display:flex;flex-direction:column;gap:22px;justify-content:center;flex:1}
+.intro .name{font-size:88px;font-weight:600;letter-spacing:-0.02em;line-height:1}
+.intro .career{font-size:32px;color:var(--muted)}.intro .mail{font-family:"IBM Plex Mono",monospace;font-size:26px;color:var(--amber);margin-top:16px}
+pre.mermaid{background:transparent;border:none;padding:0;display:flex;justify-content:center;align-items:flex-start;color:transparent;width:100%}
+pre.mermaid svg{width:100% !important;max-width:none !important;height:auto;max-height:560px}
+pre.mermaid svg text{fill:#E7ECF2 !important}pre.mermaid svg .edgeLabel text,pre.mermaid svg .edgeLabel tspan{fill:#B8C2CF !important}pre.mermaid svg .edgeLabel rect,pre.mermaid svg .labelBkg{fill:#0F141B !important;opacity:1}
+#bar{position:fixed;left:0;bottom:0;height:4px;background:var(--amber);width:0;transition:width .2s}
+#hint{position:fixed;right:18px;top:12px;font-size:13px;color:var(--muted);opacity:.7}
+#overview{position:fixed;inset:0;background:#0A0D12;display:none;overflow:auto;padding:36px 48px;z-index:10}
+#overview.on{display:block}
+#overview .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:22px}
+#overview .cell{position:relative;cursor:pointer;border:2px solid var(--line);border-radius:6px;overflow:hidden;background:var(--bg);aspect-ratio:16/9}
+#overview .cell.cur{border-color:var(--amber)}#overview .cell:hover{border-color:#fff}
+#overview .cell .mini{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;pointer-events:none}
+#overview .cell .mini .slide{display:flex}
+#overview .cell .n{position:absolute;right:8px;bottom:6px;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--amber);background:rgba(15,20,27,.85);padding:1px 7px;border-radius:3px}
+#overview .cell .t{position:absolute;left:0;right:0;bottom:0;padding:5px 9px;font-size:12px;color:var(--text);background:linear-gradient(transparent,rgba(15,20,27,.95) 40%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#overview h2{font-size:18px;color:var(--muted);font-weight:500;margin-bottom:18px}
+@media (prefers-reduced-motion: reduce){#bar{transition:none}}
+pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:block}
+.cmd{font-family:"IBM Plex Mono",monospace;font-size:24px;background:var(--panel2);border-left:4px solid var(--amber);padding:12px 20px;border-radius:0 6px 6px 0}
+.cmd .prompt{color:var(--amber);margin-right:10px}.cmd .note{color:var(--muted);font-size:19px;margin-left:18px}
+.placeholder{border:1px dashed var(--line);border-radius:6px;padding:30px 24px;color:var(--muted);text-align:center;font-size:21px;line-height:1.5}
+/* ── 오후 ② 보드 슬라이드 ── */
+.body.tut{gap:26px;justify-content:center}
+.tut .lead{font-size:31px;line-height:1.45;text-align:center}.tut .lead b{color:var(--amber);font-weight:600}
+.tut svg.wb{display:block;width:1500px;align-self:center}
+.tut svg .hand{font-family:"IBM Plex Sans KR",sans-serif;font-weight:500}
+.tut svg .lbl{font-family:"IBM Plex Mono",monospace;font-weight:600;white-space:pre}
+.tut .say{display:flex;flex-direction:column;gap:10px;align-self:center;width:1500px}
+.tut .say p{font-size:26px;line-height:1.45;display:flex;gap:18px;align-items:baseline}
+.tut .say p span{flex:0 0 290px;font-size:20px;font-weight:600;color:var(--muted);text-align:right}
+.tut .say p.bad span{color:var(--mag)}.tut .say p.go span{color:var(--amber)}
+.tut .say p.plain{display:block;text-align:center;font-size:27px}.tut .say p.plain b{color:var(--amber);font-weight:600}
+.demo4{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;word-break:keep-all}
+.demo4 .dc{display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px 24px;min-height:330px}
+.demo4 .no{width:44px;height:44px;border-radius:50%;border:2px solid var(--amber);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600}
+.demo4 b{font-size:30px;font-weight:600;line-height:1.25}.demo4 p{font-size:22px;line-height:1.45;color:var(--muted)}
+.demo4 code{align-self:flex-start;font-size:19px}
+.demo4 .ref{margin-top:auto;font-size:19px;color:var(--amber);padding-top:14px;border-top:1px solid var(--line)}
+.s17d{gap:48px;justify-content:center}
+.nbf{display:flex;align-items:baseline;gap:18px;font-size:26px}.nbf span{font-size:20px;font-weight:600;color:var(--amber)}.nbf code{font-size:26px}.nbf em{font-style:normal;font-size:21px;color:var(--muted)}
+.lab4{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;word-break:keep-all}
+.lab4 .c{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px 24px}
+.lab4 .no{font-family:"IBM Plex Mono",monospace;font-size:22px;color:var(--amber);font-weight:600}
+.lab4 b{font-size:29px;font-weight:600;line-height:1.3}.lab4 p{font-size:21px;line-height:1.45;color:var(--muted);flex:1}
+.lab4 code{align-self:flex-start;font-size:18px}
+.labov{gap:40px;justify-content:center}.labov .take{font-size:27px;text-align:center}.labov .take b{color:var(--amber)}
+.body.task{gap:22px;justify-content:flex-start;padding-bottom:12px}
+.task .q{font-size:31px;line-height:1.45}.task .q b{color:var(--amber);font-weight:600}
+.task .give{display:grid;grid-template-columns:1fr 1fr;gap:24px;word-break:keep-all}
+.task .give .c{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 24px;min-width:0}
+.task .give small{font-size:18px;font-weight:600;color:var(--amber);letter-spacing:.04em}
+.task .give p{font-size:22px;line-height:1.5;color:var(--muted)}.task .give p b{color:var(--text);font-weight:600}
+.task .give pre{font-size:16px;line-height:1.45;padding:0;margin:0;background:none;border:none;white-space:pre-wrap;word-break:break-all}
+.task .give pre .dim{color:#5B6676}
+.task .give code{font-size:19px}
+.task .ans{flex:1;min-height:0;position:relative;border:1px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+.task .ans > span{font-size:18px;font-weight:600;color:var(--amber);padding:14px 24px 0;letter-spacing:.04em}
+.task .ans pre{border:none;background:none;font-size:16px;line-height:1.36;padding:6px 24px 10px}
+.task .ans pre .nw{color:var(--amber)}.task .ans pre .del{color:#F08B8B}.task .ans pre .add{color:#8BE0A4}
+.task .ans:not(.shown) > *{visibility:hidden}
+.task .ans:not(.shown)::after{content:"정답 · → 키를 누르면 공개";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--muted)}
+.task .ans.shown{border-style:solid;border-color:var(--amber);background:var(--panel)}
+.body.sum{gap:36px;justify-content:center}
+.sum2{display:grid;grid-template-columns:1fr 1fr;gap:28px;word-break:keep-all}
+.sum2 .c{display:flex;flex-direction:column;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:36px 36px}
+.sum2 .no{width:48px;height:48px;border-radius:50%;border:2px solid var(--amber);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600}
+.sum2 b{font-size:36px;font-weight:600;line-height:1.3}.sum2 p{font-size:25px;line-height:1.55;color:var(--muted)}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;word-break:keep-all}
+.sum3 .c{display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:32px 30px}
+.sum3 .no{width:46px;height:46px;border-radius:50%;border:2px solid var(--amber);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:600}
+.sum3 b{font-size:32px;font-weight:600;line-height:1.3}.sum3 p{font-size:23px;line-height:1.55;color:var(--muted)}
+.sum .next{align-self:center;display:flex;gap:18px;align-items:baseline;font-size:26px;padding:16px 30px;border:1px solid var(--amber);border-radius:10px}
+.sum .next span{font-size:19px;font-weight:600;color:var(--amber)}.sum .next em{font-style:normal;color:var(--muted);font-size:22px}
+</style>
+</head>
+<body>
+<div id="stage">
+<section class="slide">
+  <h1>언제 사람이 끼어들어야 하나 — human-in-the-loop</h1>
+  <div class="body tut"><p class="lead">Agent 는 도구를 고르고 부르는 것까지 <b>혼자</b> 한다. 그런데 <b>사람이 확인해야 하는 때</b>가 있다</p>
+<svg class="wb" viewBox="0 0 1500 350" role="img"><defs>
+<filter id="roughp3_1" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_1" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_1" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="350" rx="18" fill="#161D26" stroke="#2A3542"/><rect x="60" y="30" width="440" height="290" rx="12" fill="#1C2531" stroke="#F2B544" stroke-width="2"/><text x="88" y="82" font-size="30" fill="#E7ECF2" text-anchor="start" class="hand">승인</text><text x="88" y="120" font-size="19" fill="#F2B544" text-anchor="start" class="lbl">approval</text><text x="88" y="172" font-size="20" fill="#E7ECF2" text-anchor="start" class="hand">되돌리기 어려운 일을 하기 전에</text><text x="88" y="214" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">· DB 에 쓰기 · 메일 보내기 · 결제</text><text x="88" y="246" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">· 실습: 정비 부품 청구</text><text x="88" y="296" font-size="18" fill="#F2B544" text-anchor="start" class="hand">오늘</text><rect x="530" y="30" width="440" height="290" rx="12" fill="#1C2531" stroke="#F2B544" stroke-width="2"/><text x="558" y="82" font-size="30" fill="#E7ECF2" text-anchor="start" class="hand">고치기</text><text x="558" y="120" font-size="19" fill="#F2B544" text-anchor="start" class="lbl">editing</text><text x="558" y="172" font-size="20" fill="#E7ECF2" text-anchor="start" class="hand">Agent 가 잘못 알아들었을 때</text><text x="558" y="214" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">· 학생: "아니, meticulous 를 찾아 줘"</text><text x="558" y="246" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">· 사람이 State 를 고쳐서 이어 간다</text><text x="558" y="296" font-size="18" fill="#F2B544" text-anchor="start" class="hand">오늘</text><rect x="1000" y="30" width="440" height="290" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="1028" y="82" font-size="30" fill="#E7ECF2" text-anchor="start" class="hand">되돌려 보기</text><text x="1028" y="120" font-size="19" fill="#F2B544" text-anchor="start" class="lbl">debugging</text><text x="1028" y="172" font-size="20" fill="#E7ECF2" text-anchor="start" class="hand">왜 이렇게 했는지 알고 싶을 때</text><text x="1028" y="214" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">· 지난 단계로 돌아가 다시 돌린다</text><text x="1028" y="246" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">· 다른 입력으로 갈라져 본다</text><text x="1028" y="296" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">오후 ④</text></svg>
+<div class="say"><p class=""><span>공통점</span>Agent 가 혼자 끝까지 가는 동안, 사람이 중간에 보고 · 멈추고 · 고칠 수 있어야 한다</p><p class="go"><span>순서</span>승인과 고치기는 오늘, 되돌려 보기는 오후 ④. 셋 다 오후 ② 의 checkpoint 위에서 돈다</p></div></div>
+  <footer><span class="blk">도입 · Academy 모듈 3</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>사람이 중간에 확인하려면</h1>
+  <div class="body tut"><p class="lead">튜터 Agent 가 사전을 찾고 답을 쓰는 동안, 사람은 <b>보고, 멈추고, 고칠</b> 수 있어야 한다</p>
+<svg class="wb" viewBox="0 0 1500 360" role="img"><defs>
+<filter id="roughp3_2" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_2" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_2" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="360" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="97" font-size="20" fill="#8C98A8" text-anchor="start" class="hand">튜터 Agent</text><text x="300" y="97" font-size="19" fill="#8C98A8" text-anchor="middle" class="hand">START</text><rect x="435.0" y="62" width="170" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="520" y="98" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><rect x="815.0" y="62" width="170" height="56" rx="12" fill="#1C2531" stroke="#C97BDC" stroke-width="2.5"/><text x="900" y="98" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><rect x="1195.0" y="62" width="170" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="1280" y="98" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M345,90 L425,90" fill="none" stroke="#8C98A8" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_2)"/><path d="M608,90 L780,90" fill="none" stroke="#8C98A8" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_2)"/><rect x="789" y="73" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="803" y="73" width="8" height="34" rx="2" fill="#C97BDC"/><path d="M988,90 L1185,90" fill="none" stroke="#8C98A8" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_2)"/><text x="900" y="140" font-size="16" fill="#8C98A8" text-anchor="middle" class="hand">lookup_word 사전 찾기</text><text x="1280" y="140" font-size="16" fill="#8C98A8" text-anchor="middle" class="hand">답을 쓴다</text><text x="60" y="272" font-size="20" fill="#8C98A8" text-anchor="start" class="hand">사람</text><path d="M520,150 L520,207" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 6" marker-end="url(#aPp3_2)"/><rect x="360" y="215" width="320" height="116" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="520" y="255" font-size="24" fill="#F2B544" text-anchor="middle" class="hand">① 본다</text><text x="520" y="285" font-size="17" fill="#E7ECF2" text-anchor="middle" class="hand">지금 무엇을 하는지</text><text x="520" y="316" font-size="16" fill="#8C98A8" text-anchor="middle" class="lbl">stream · L1</text><path d="M800,126 L900,207" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 6" marker-end="url(#aPp3_2)"/><rect x="740" y="215" width="320" height="116" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="900" y="255" font-size="24" fill="#F2B544" text-anchor="middle" class="hand">② 멈춘다</text><text x="900" y="285" font-size="17" fill="#E7ECF2" text-anchor="middle" class="hand">사전을 찾기 직전에</text><text x="900" y="316" font-size="16" fill="#8C98A8" text-anchor="middle" class="lbl">breakpoint · L2</text><path d="M1062,273 L1118,273" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aPp3_2)"/><rect x="1120" y="215" width="320" height="116" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="1280" y="255" font-size="24" fill="#F2B544" text-anchor="middle" class="hand">③ 고친다</text><text x="1280" y="285" font-size="17" fill="#E7ECF2" text-anchor="middle" class="hand">멈춘 동안 State 를</text><text x="1280" y="316" font-size="16" fill="#8C98A8" text-anchor="middle" class="lbl">updateState · L3</text></svg>
+<div class="say"><p class="bad"><span>지금은</span>invoke 가 끝날 때까지 아무것도 안 보인다. 모델이 무엇을 찾으려는지 확인할 틈이 없다</p><p class="go"><span>오늘 순서</span>① 진행 상황을 본다 → ② 정해 둔 자리에서 멈춘다 → ③ 멈춘 동안 State 를 고쳐서 이어 간다</p></div></div>
+  <footer><span class="blk">도입 · Academy 모듈 3</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>답이 나올 때까지 아무것도 안 보인다</h1>
+  <div class="body tut"><p class="lead">단어 두 개를 찾아 문장을 고쳐 달라고 하면, 튜터는 모델을 두 번 부른다. invoke 는 <b>END 에 닿아야</b> 돌아온다</p>
+<svg class="wb" viewBox="0 0 1500 380" role="img"><defs>
+<filter id="roughp3_3" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_3" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_3" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="380" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="87" font-size="20" fill="#8C98A8" text-anchor="start" class="hand">그래프 안</text><rect x="310" y="54" width="220" height="52" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="420" y="88" font-size="20" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><rect x="690" y="54" width="220" height="52" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="800" y="88" font-size="20" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><rect x="1070" y="54" width="220" height="52" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="1180" y="88" font-size="20" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M250,136 L1380,136" fill="none" stroke="#8C98A8" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_3)"/><text x="1400" y="142" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">시간</text><text x="60" y="230" font-size="20" fill="#8C98A8" text-anchor="start" class="hand">부른 쪽 · 화면</text><rect x="250" y="200" width="1000" height="56" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2" stroke-dasharray="6 6"/><text x="750" y="236" font-size="20" fill="#8C98A8" text-anchor="middle" class="hand">아무것도 안 온다 · 모델을 한 번 부를 때마다 몇 초씩</text><path d="M1254,228 L1300,228" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_3)"/><rect x="1308" y="200" width="150" height="56" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="1383.0" y="236" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl">답 · 14.7초</text><path d="M50,300 L1450,300" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="345" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">const out = await agent.invoke(ask(Q));   // END 에 닿아야 돌아온다</text></svg>
+<div class="say"><p class=""><span>노드의 console.log</span>노드 안에서 찍는 로그는 그래프를 돌리는 쪽(서버)에만 보인다. 그래프를 부른 화면은 아무것도 못 받는다</p><p class="bad"><span>그래서</span>학생은 15초 동안 멈춘 화면을 본다. 사전을 찾는 중인지, 답을 쓰는 중인지도 모른다</p></div></div>
+  <footer><span class="blk">이론 · L1 Streaming</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>노드가 끝날 때마다 받는다 — stream</h1>
+  <div class="body tut"><p class="lead">invoke 대신 <b>stream</b> 으로 부르면, 노드가 하나 끝날 때마다 값이 하나씩 온다</p>
+<svg class="wb" viewBox="0 0 1500 385" role="img"><defs>
+<filter id="roughp3_4" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_4" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_4" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="385" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="87" font-size="20" fill="#8C98A8" text-anchor="start" class="hand">그래프 안</text><rect x="310" y="54" width="220" height="52" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="420" y="88" font-size="20" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><rect x="690" y="54" width="220" height="52" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="800" y="88" font-size="20" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><rect x="1070" y="54" width="220" height="52" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="1180" y="88" font-size="20" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M250,136 L1380,136" fill="none" stroke="#8C98A8" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_4)"/><text x="1400" y="142" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">시간</text><text x="60" y="250" font-size="20" fill="#8C98A8" text-anchor="start" class="hand">부른 쪽 · 화면</text><path d="M510,110 L510,212" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 6" marker-end="url(#aPp3_4)"/><rect x="380" y="220" width="260" height="48" rx="10" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="510" y="250" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl">{ tutor: … }</text><text x="510" y="290" font-size="15" fill="#8C98A8" text-anchor="middle" class="hand">8.5초 · 도구 요청</text><path d="M890,110 L890,212" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 6" marker-end="url(#aPp3_4)"/><rect x="760" y="220" width="260" height="48" rx="10" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="890" y="250" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl">{ tools: … }</text><text x="890" y="290" font-size="15" fill="#8C98A8" text-anchor="middle" class="hand">8.5초 · 사전 결과</text><path d="M1270,110 L1270,212" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 6" marker-end="url(#aPp3_4)"/><rect x="1140" y="220" width="260" height="48" rx="10" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="1270" y="250" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl">{ tutor: … }</text><text x="1270" y="290" font-size="15" fill="#8C98A8" text-anchor="middle" class="hand">14.3초 · 답</text><path d="M50,310 L1450,310" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="352" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">for await (const chunk of await agent.stream(ask(Q), { streamMode: &quot;updates&quot; })) { … }</text></svg>
+<div class="say"><p class=""><span>쓰는 법</span><code>for await</code> 로 하나씩 꺼낸다. 다 돈 뒤의 State 는 <code>getState</code> 로 본다</p><p class="go"><span>무엇을 받나</span><code>streamMode</code> 로 고른다. 모드에 따라 받는 값이 달라진다</p></div></div>
+  <footer><span class="blk">이론 · L1 Streaming</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>바뀐 것만, 아니면 전부 — streamMode</h1>
+  <div class="body tut"><p class="lead">노드 셋이 차례로 A · B · C 를 더한다. <b>updates</b> 는 바뀐 것만, <b>values</b> 는 그때의 State 전체를 준다</p>
+<svg class="wb" viewBox="0 0 1500 360" role="img"><defs>
+<filter id="roughp3_5" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_5" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_5" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="360" rx="18" fill="#161D26" stroke="#2A3542"/><text x="120" y="76" font-size="19" fill="#8C98A8" text-anchor="middle" class="hand">입력</text><rect x="335.0" y="42" width="190" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="430" y="78" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">node_a</text><text x="430" y="125" font-size="18" fill="#8C98A8" text-anchor="middle" class="hand">A 를 더한다</text><path d="M180,70 L330,70" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_5)"/><rect x="705.0" y="42" width="190" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="800" y="78" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">node_b</text><text x="800" y="125" font-size="18" fill="#8C98A8" text-anchor="middle" class="hand">B 를 더한다</text><path d="M530,70 L700,70" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_5)"/><rect x="1075.0" y="42" width="190" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="1170" y="78" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">node_c</text><text x="1170" y="125" font-size="18" fill="#8C98A8" text-anchor="middle" class="hand">C 를 더한다</text><path d="M900,70 L1070,70" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_5)"/><text x="60" y="207" font-size="21" fill="#F2B544" text-anchor="start" class="lbl">&quot;updates&quot;</text><text x="60" y="235" font-size="16" fill="#8C98A8" text-anchor="start" class="hand">그 노드가 돌려준 값만</text><rect x="320" y="177" width="220" height="56" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="430.0" y="213" font-size="19" fill="#F2B544" text-anchor="middle" class="lbl">{ node_a: A }</text><rect x="690" y="177" width="220" height="56" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="800.0" y="213" font-size="19" fill="#F2B544" text-anchor="middle" class="lbl">{ node_b: B }</text><rect x="1060" y="177" width="220" height="56" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="1170.0" y="213" font-size="19" fill="#F2B544" text-anchor="middle" class="lbl">{ node_c: C }</text><text x="60" y="307" font-size="21" fill="#E7ECF2" text-anchor="start" class="lbl">&quot;values&quot;</text><text x="60" y="335" font-size="16" fill="#8C98A8" text-anchor="start" class="hand">그때의 State 전체</text><rect x="320" y="277" width="220" height="56" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="430.0" y="313" font-size="19" fill="#E7ECF2" text-anchor="middle" class="lbl">A</text><rect x="690" y="277" width="220" height="56" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="800.0" y="313" font-size="19" fill="#E7ECF2" text-anchor="middle" class="lbl">A · B</text><rect x="1060" y="277" width="220" height="56" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="1170.0" y="313" font-size="19" fill="#E7ECF2" text-anchor="middle" class="lbl">A · B · C</text></svg>
+<div class="say"><p class=""><span>updates</span><code>{ 노드 이름: 돌려준 값 }</code>. 진행 상황을 띄울 때 — "agent 가 도구를 요청했다"</p><p class=""><span>values</span>State 전체. 처음 넣은 입력부터 나온다. 지금 State 를 통째로 그릴 때</p></div></div>
+  <footer><span class="blk">이론 · L1 Streaming</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>모델이 쓰는 글자를 바로 보여 주려면 — token streaming</h1>
+  <div class="body tut"><p class="lead">노드가 끝나기를 기다리지 않고, 모델이 보내는 <b>토큰</b>을 받는 대로 흘려보낸다</p>
+<svg class="wb" viewBox="0 0 1500 395" role="img"><defs>
+<filter id="roughp3_6" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_6" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_6" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="395" rx="18" fill="#161D26" stroke="#2A3542"/><rect x="60" y="50" width="190" height="80" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="155" y="86" font-size="20" fill="#E7ECF2" text-anchor="middle" class="hand">모델 API</text><text x="155" y="115" font-size="15" fill="#8C98A8" text-anchor="middle" class="lbl">stream: true</text><rect x="290" y="70" width="74" height="40" rx="8" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="327.0" y="97" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl">결론</text><rect x="378" y="70" width="118" height="40" rx="8" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="437.0" y="97" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl"> 문단은</text><rect x="510" y="70" width="96" height="40" rx="8" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="558.0" y="97" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl"> 주요</text><rect x="620" y="70" width="118" height="40" rx="8" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="679.0" y="97" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl"> 논지를</text><rect x="752" y="70" width="74" height="40" rx="8" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="789.0" y="97" font-size="17" fill="#F2B544" text-anchor="middle" class="lbl"> …</text><path d="M840,90 L900,90" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aPp3_6)"/><rect x="905" y="30" width="540" height="150" rx="12" fill="none" stroke="#3A4553" stroke-width="2" stroke-dasharray="10 9"/><text x="1175" y="22" font-size="18" fill="#8C98A8" text-anchor="middle" class="hand">그래프 안</text><rect x="960.0" y="62" width="160" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="1040" y="98" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><text x="1140" y="96" font-size="17" fill="#F2B544" text-anchor="start" class="lbl">config.writer(토큰)</text><path d="M1175,128 L1175,222" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 6" marker-end="url(#aPp3_6)"/><text x="60" y="262" font-size="20" fill="#8C98A8" text-anchor="start" class="hand">부른 쪽 · 화면</text><rect x="260" y="232" width="1185" height="56" rx="12" fill="#0F141B" stroke="#F2B544" stroke-width="2"/><text x="290" y="268" font-size="21" fill="#F2B544" text-anchor="start" class="hand">결론 문단은 주요 논지를 ▍</text><text x="1425" y="268" font-size="17" fill="#8C98A8" text-anchor="end" class="hand">streamMode: "custom" 으로 받는다</text><path d="M50,320 L1450,320" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="362" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">graph.stream(input, { streamMode: [&quot;updates&quot;, &quot;custom&quot;] })   // [모드, 값] 으로 온다</text></svg>
+<div class="say"><p class=""><span>우리는 fetch</span><code>stream: true</code> 로 부르면 답이 토큰 단위로 온다. 노드가 <code>config.writer(토큰)</code> 로 밖에 흘려보낸다</p></div></div>
+  <footer><span class="blk">이론 · L1 Streaming</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>시연: 진행 상황 보기</h1>
+  <div class="body s17d"><div class="demo4" style="grid-template-columns:repeat(4,1fr)">
+<div class="dc"><span class="no">1</span><b>invoke</b><p>단어 두 개를 찾아 문장을 고친다. 15초쯤 아무것도 없다가 한꺼번에</p><code>invoke</code><span class="ref">노트북 ①</span></div><div class="dc"><span class="no">2</span><b>updates</b><p>8초에 도구 요청, 바로 사전 결과, 몇 초 뒤 답. 노드가 바꾼 것만 온다</p><code>streamMode: "updates"</code><span class="ref">노트북 ②</span></div><div class="dc"><span class="no">3</span><b>values</b><p>같은 실행을 State 전체로. messages 2 → 3 → 5 → 6</p><code>streamMode: "values"</code><span class="ref">노트북 ③</span></div><div class="dc"><span class="no">4</span><b>토큰</b><p>긴 답을 글자 단위로. 1초 만에 첫 글자부터 흘러나온다</p><code>config.writer · "custom"</code><span class="ref">노트북 ④</span></div>
+</div>
+<p class="nbf"><span>노트북</span><code>demo/tutor-stream.ipynb</code><em>오후 ① 의 튜터 Agent 그대로 · 모델을 부른다</em></p></div>
+  <footer><span class="blk">시연 · L1</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>정해 둔 노드에서 멈춘다 — breakpoint</h1>
+  <div class="body tut"><p class="lead"><b>breakpoint</b> 는 그래프를 중간에서 중단하는 방법이다.</p>
+<svg class="wb" viewBox="0 0 1500 405" role="img"><defs>
+<filter id="roughp3_7" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_7" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_7" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="405" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="92" font-size="21" fill="#F2B544" text-anchor="start" class="lbl">interruptBefore: [&quot;tools&quot;]</text><text x="60" y="130" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">tools 를 돌기 직전에 멈춘다</text><rect x="645.0" y="57" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="720" y="93" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M797,85 L890,85" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="10 9" marker-end="url(#aPp3_7)"/><rect x="907" y="68" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="921" y="68" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="945.0" y="57" width="150" height="56" rx="12" fill="#1C2531" stroke="#C97BDC" stroke-width="2.5"/><text x="1020" y="93" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><path d="M1097,85 L1238,85" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_7)"/><rect x="1245.0" y="57" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="1320" y="93" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><text x="60" y="207" font-size="21" fill="#F2B544" text-anchor="start" class="lbl">interruptAfter: [&quot;tools&quot;]</text><text x="60" y="245" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">tools 를 돈 직후에 멈춘다</text><rect x="645.0" y="172" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="720" y="208" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M797,200 L938,200" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="10 9" marker-end="url(#aPp3_7)"/><rect x="945.0" y="172" width="150" height="56" rx="12" fill="#1C2531" stroke="#C97BDC" stroke-width="2.5"/><text x="1020" y="208" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><rect x="1106" y="183" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="1120" y="183" width="8" height="34" rx="2" fill="#C97BDC"/><path d="M1140,200 L1238,200" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_7)"/><rect x="1245.0" y="172" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="1320" y="208" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M50,300 L1450,300" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="345" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">builder.compile({ checkpointer: new MemorySaver(), interruptBefore: [&quot;tools&quot;] })</text><text x="60" y="377" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">graph.stream(입력, { ...thread1, interruptBefore: [&quot;tools&quot;] })</text><text x="1440" y="345" font-size="17" fill="#8C98A8" text-anchor="end" class="hand">compile 할 때</text><text x="1440" y="377" font-size="17" fill="#8C98A8" text-anchor="end" class="hand">실행할 때</text></svg>
+<div class="say"><p class=""><span>interruptBefore</span>적어 둔 노드를 실행하기 직전에 멈춘다</p><p class=""><span>interruptAfter</span>적어 둔 노드를 실행한 직후에 멈춘다</p><p class="bad"><span>주의 · checkpointer</span>반드시 있어야 한다. 멈출 때 State 를 저장해 두고, 이어 갈 때 그 State 에서 다시 돌기 때문</p></div></div>
+  <footer><span class="blk">이론 · L2 Breakpoints</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>멈춘 자리를 본다 — getState</h1>
+  <div class="body tut"><p class="lead">breakpoint 에서 멈추면 그래프 실행이 끝나고 <code>__interrupt__</code> 를 받는다. 어디서 멈췄는지는 <b>getState</b> 로 본다</p>
+<svg class="wb" viewBox="0 0 1500 500" role="img"><defs>
+<filter id="roughp3_8" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_8" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_8" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="500" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="50" font-size="19" fill="#E7ECF2" text-anchor="start" class="lbl">for await (const state of await graph.stream(입력, { ...thread1, streamMode: &quot;values&quot; }))</text><rect x="90" y="79" width="560" height="42" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="110" y="106" font-size="17" fill="#E7ECF2" text-anchor="start" class="lbl">{ messages: [ system, user ] }</text><rect x="90" y="131" width="560" height="42" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="110" y="158" font-size="17" fill="#E7ECF2" text-anchor="start" class="lbl">{ messages: [ …, assistant 도구 요청 ] }</text><rect x="90" y="183" width="560" height="42" rx="12" fill="#0F141B" stroke="#C97BDC" stroke-width="2"/><text x="110" y="210" font-size="17" fill="#C97BDC" text-anchor="start" class="lbl">{ __interrupt__: [ ] }</text><text x="680" y="210" font-size="18" fill="#C97BDC" text-anchor="start" class="hand">멈췄다 · 그래프 실행이 끝난다</text><path d="M50,265 L1450,265" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="310" font-size="21" fill="#E7ECF2" text-anchor="start" class="lbl">await graph.getState(thread1)</text><text x="440" y="310" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">어디서 멈췄지?</text><rect x="60" y="342" width="1380" height="58" rx="12" fill="#0F141B" stroke="#F2B544" stroke-width="2"/><text x="90" y="377" font-size="20" fill="#F2B544" text-anchor="start" class="lbl">next</text><text x="220" y="377" font-size="18" fill="#F2B544" text-anchor="start" class="lbl">[ &quot;tools&quot; ]</text><text x="1415" y="377" font-size="16" fill="#8C98A8" text-anchor="end" class="hand">다음에 돌 노드 · tools 앞에서 멈췄다. [ ] 면 끝까지 돈 것</text><rect x="60" y="418" width="1380" height="58" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="90" y="453" font-size="20" fill="#8C98A8" text-anchor="start" class="lbl">values</text><text x="220" y="453" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">{ messages: [ system, user, assistant 도구 요청 ] }</text><text x="1415" y="453" font-size="16" fill="#8C98A8" text-anchor="end" class="hand">지금 State</text></svg>
+<div class="say"><p class="go"><span>next</span>다음에 돌 노드. 값이 있으면 그 노드 앞에서 멈춘 것, <code>[]</code> 빈 배열이면 그래프가 끝까지 돈 것</p><p class=""><span>values</span>지금 State</p></div></div>
+  <footer><span class="blk">이론 · L2 Breakpoints</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>null 을 넣으면 이어 간다</h1>
+  <div class="body tut"><p class="lead">같은 thread 로, 입력 자리에 <b>null</b> 을 넣어 부르면 멈춘 자리에서 계속 돈다</p>
+<svg class="wb" viewBox="0 0 1500 390" role="img"><defs>
+<filter id="roughp3_9" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_9" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_9" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="390" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="97" font-size="20" fill="#E7ECF2" text-anchor="start" class="lbl">① stream(입력, thread1)</text><text x="510" y="97" font-size="19" fill="#8C98A8" text-anchor="middle" class="hand">START</text><path d="M598,90 L660,90" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_9)"/><rect x="680.0" y="62" width="140" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="750" y="98" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M818,90 L870,90" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_9)"/><rect x="884" y="73" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="898" y="73" width="8" height="34" rx="2" fill="#C97BDC"/><text x="1430" y="97" font-size="19" fill="#C97BDC" text-anchor="end" class="hand">tools 앞에서 멈춤 · __interrupt__</text><text x="60" y="237" font-size="20" fill="#F2B544" text-anchor="start" class="lbl">② stream(null, thread1)</text><rect x="439" y="213" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="453" y="213" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="460.0" y="202" width="140" height="56" rx="12" fill="#1C2531" stroke="#C97BDC" stroke-width="2.5"/><text x="530" y="238" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><path d="M598,230 L660,230" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_9)"/><rect x="680.0" y="202" width="140" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="750" y="238" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M818,230 L880,230" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_9)"/><text x="950" y="237" font-size="19" fill="#8C98A8" text-anchor="middle" class="hand">END</text><text x="1430" y="237" font-size="19" fill="#F2B544" text-anchor="end" class="hand">멈춘 자리에서 이어 간다</text><text x="60" y="360" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">null = 새 입력은 없다 · 같은 thread_id 의 마지막 checkpoint 에서 계속</text></svg>
+<div class="say"><p class=""><span>null</span>"새 입력은 없다". 입력을 넣으면 새 질문으로 처음부터 돈다</p><p class="go"><span>다시 흐른다</span>멈춘 자리부터 다시 돈다. values 면 멈춘 자리의 State 가 먼저 온다</p></div></div>
+  <footer><span class="blk">이론 · L2 Breakpoints</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>승인은 멈추기 · 보기 · 이어 가기를 묶은 것</h1>
+  <div class="body tut"><p class="lead">멈춘 자리를 사람에게 보여 주고, <b>y 면 이어 간다</b>. 아니면?</p>
+<svg class="wb" viewBox="0 0 1500 285" role="img"><defs>
+<filter id="roughp3_10" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_10" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_10" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="285" rx="18" fill="#161D26" stroke="#2A3542"/><rect x="79" y="73" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="93" y="73" width="8" height="34" rx="2" fill="#C97BDC"/><text x="115" y="98" font-size="21" fill="#C97BDC" text-anchor="start" class="hand">멈춤</text><path d="M180,90 L260,90" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_10)"/><rect x="270" y="55" width="360" height="70" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2"/><text x="450" y="85" font-size="18" fill="#E7ECF2" text-anchor="middle" class="lbl">getState(thread1)</text><text x="450" y="112" font-size="16" fill="#8C98A8" text-anchor="middle" class="hand">무엇을 하려는지 보여 준다</text><path d="M640,90 L720,90" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_10)"/><rect x="730" y="55" width="220" height="70" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="840" y="98" font-size="21" fill="#F2B544" text-anchor="middle" class="hand">사람: y ?</text><path d="M960,75 L1060,45" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aPp3_10)"/><rect x="1070" y="15" width="380" height="60" rx="12" fill="#0F141B" stroke="#F2B544" stroke-width="2"/><text x="1090" y="52" font-size="18" fill="#F2B544" text-anchor="start" class="lbl">stream(null, thread1)</text><text x="1430" y="52" font-size="17" fill="#8C98A8" text-anchor="end" class="hand">이어 간다</text><path d="M960,105 L1060,135" fill="none" stroke="#C97BDC" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_10)"/><rect x="1070" y="105" width="380" height="60" rx="12" fill="#0F141B" stroke="#C97BDC" stroke-width="2"/><text x="1090" y="142" font-size="19" fill="#C97BDC" text-anchor="start" class="hand">멈춘 채로 둔다</text><text x="1430" y="142" font-size="17" fill="#8C98A8" text-anchor="end" class="hand">그다음은?</text><path d="M50,205 L1450,205" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="250" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">if (approval === &quot;y&quot;) await run(approveAgent, null, thread2);   // run = stream 루프 · 시연 노트북 ① 의 승인 칸</text></svg>
+<div class="say"><p class=""><span>보여 줄 것</span>마지막 메시지의 <code>tool_calls</code> — 어떤 도구를, 어떤 값으로 부르려는지</p><p class="bad"><span>아니면</span>멈춘 채로 두면 일은 거기서 끝이다. 거절이나 의견을 그래프에 알려 주려면 State 를 고쳐야 한다</p></div></div>
+  <footer><span class="blk">이론 · L2 Breakpoints</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>시연: 멈추고, 보고, 승인하기</h1>
+  <div class="body s17d"><div class="demo4" style="grid-template-columns:repeat(4,1fr)">
+<div class="dc"><span class="no">1</span><b>멈춘다</b><p>질문 State · 도구 요청 State 뒤에 __interrupt__ 가 오고 루프가 끝난다. 사전은 아직 안 찾았다</p><code>interruptBefore</code><span class="ref">노트북 ①</span></div><div class="dc"><span class="no">2</span><b>본다</b><p>next 는 ["tools"]. 모델이 하려는 일은 lookup_word {"word": "ubiquitous"}</p><code>getState</code><span class="ref">노트북 ②</span></div><div class="dc"><span class="no">3</span><b>이어 간다</b><p>null 로 부르면 tools 부터 돌아 사전을 찾고 답한다. __interrupt__ 없이 끝난다</p><code>stream(null)</code><span class="ref">노트북 ③</span></div><div class="dc"><span class="no">4</span><b>승인</b><p>입력창에 y 면 이어 간다. n 이면 tools 앞에 멈춘 채로 남는다</p><code>prompt()</code><span class="ref">노트북 ④</span></div>
+</div>
+<p class="nbf"><span>노트북</span><code>demo/tutor-breakpoints.ipynb</code><em>튜터 Agent 에 checkpointer 를 달고 · 모델을 부른다</em></p></div>
+  <footer><span class="blk">시연 · L2</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>멈춘 동안 State 를 고친다 — updateState</h1>
+  <div class="body tut"><p class="lead">멈춰 있는 동안 사람이 State 를 고치면, Agent 의 <b>다음 동작이 바뀐다</b></p>
+<svg class="wb" viewBox="0 0 1500 430" role="img"><defs>
+<filter id="roughp3_11" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_11" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_11" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="430" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="40" font-size="19" fill="#8C98A8" text-anchor="start" class="hand">멈춘 State · tutor 앞</text><rect x="60" y="61" width="620" height="48" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="80" y="91" font-size="17" fill="#8C98A8" text-anchor="start" class="lbl">system</text><text x="170" y="91" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">너는 IELTS 쓰기를 돕는 영어 튜터다 …</text><rect x="60" y="123" width="620" height="48" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="80" y="153" font-size="17" fill="#8C98A8" text-anchor="start" class="lbl">user</text><text x="170" y="153" font-size="18" fill="#E7ECF2" text-anchor="start" class="hand">ubiquitous 뜻을 사전에서 찾아 줘</text><path d="M700,116 L800,116" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aPp3_11)"/><rect x="810" y="70" width="630" height="92" rx="12" fill="#2A2310" stroke="#F2B544" stroke-width="2"/><text x="830" y="106" font-size="17" fill="#F2B544" text-anchor="start" class="lbl">updateState(thread3, { messages: [{ role: &quot;user&quot;,</text><text x="830" y="140" font-size="17" fill="#F2B544" text-anchor="start" class="lbl">  content: &quot;아니, ubiquitous 말고 meticulous 를 …&quot; }] })</text><text x="60" y="232" font-size="19" fill="#8C98A8" text-anchor="start" class="hand">고친 뒤</text><rect x="60" y="256" width="900" height="44" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="80" y="284" font-size="17" fill="#8C98A8" text-anchor="start" class="lbl">system</text><text x="170" y="284" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">너는 IELTS 쓰기를 돕는 영어 튜터다 …</text><rect x="60" y="312" width="900" height="44" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="80" y="340" font-size="17" fill="#8C98A8" text-anchor="start" class="lbl">user</text><text x="170" y="340" font-size="18" fill="#E7ECF2" text-anchor="start" class="hand">ubiquitous 뜻을 사전에서 찾아 줘</text><rect x="60" y="368" width="900" height="44" rx="12" fill="#0F141B" stroke="#F2B544" stroke-width="2"/><text x="80" y="396" font-size="17" fill="#8C98A8" text-anchor="start" class="lbl">user</text><text x="170" y="396" font-size="18" fill="#F2B544" text-anchor="start" class="hand">아니, ubiquitous 말고 meticulous 를 찾아 줘</text><text x="1000" y="340" font-size="20" fill="#E7ECF2" text-anchor="start" class="hand">reducer 를 거친다</text><text x="1000" y="372" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">messages 는 이어 붙이니 뒤에 붙는다</text><text x="1000" y="404" font-size="17" fill="#F2B544" text-anchor="start" class="hand">이어 가면 모델은 이 State 를 본다</text></svg>
+<div class="say"><p class="go"><span>방향을 바꾼다</span>요청이 바뀌었다. 학생: "아니, meticulous 를 찾아 줘" → 메시지를 하나 더 넣는다. 그림이 이 경우</p><p class=""><span>실행할 값을 고친다</span>청구 수량 3 → 2, 메일 받는 사람. 도구 요청을 같은 id 로 넣어 바꿔치기 (오후 ② 11장)</p><p class=""><span>수정을 요청한다</span>초안에 "더 쉬운 말로", 청구에 "2개만" → 의견을 넣으면 모델이 보고 다시 한다 (14장 · 실습 17)</p><p class=""><span>모르는 걸 알려 준다</span>도구 결과가 낡았거나 Agent 가 모르는 사실. "어제 2개 들어왔다" 를 넣어 준다</p></div></div>
+  <footer><span class="blk">이론 · L3 Editing State</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>사람 의견을 넣는 자리를 노드로 둔다 — human feedback</h1>
+  <div class="body tut"><p class="lead">실행 도중에 <b>사람의 입력을 받아</b> State 에 넣고 싶다면? 입력을 받는 <b>자리</b>를 그래프에 노드로 만들어 둔다</p>
+<svg class="wb" viewBox="0 0 1500 400" role="img"><defs>
+<filter id="roughp3_12" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_12" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_12" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="400" rx="18" fill="#161D26" stroke="#2A3542"/><text x="230" y="157" font-size="20" fill="#8C98A8" text-anchor="middle" class="hand">START</text><path d="M290,150 L390,150" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_12)"/><rect x="399" y="133" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="413" y="133" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="425.0" y="122" width="230" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5" stroke-dasharray="7 6"/><text x="540" y="158" font-size="21" fill="#8C98A8" text-anchor="middle" class="lbl">human_feedback</text><path d="M655,150 L710,150" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_12)"/><rect x="730.0" y="122" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="805" y="158" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tutor</text><path d="M883,150 L1070,150" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="10 9" marker-end="url(#aPp3_12)"/><rect x="1110.0" y="122" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="1185" y="158" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><path d="M1185,180 Q862.5,300 560,182" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_12)"/><path d="M845,120 L925,60" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_12)"/><text x="940" y="58" font-size="19" fill="#8C98A8" text-anchor="start" class="hand">END</text><text x="550" y="100" font-size="18" fill="#C97BDC" text-anchor="middle" class="hand">하는 일 없는 노드 · 그 앞에서 멈춘다</text><path d="M50,290 L1450,290" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="335" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">.addNode(&quot;human_feedback&quot;, () =&gt; ({}))        // 아무것도 돌려주지 않는다</text><text x="60" y="367" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">.compile({ checkpointer, interruptBefore: [&quot;human_feedback&quot;] })</text></svg>
+<div class="say"><p class=""><span>13장은</span>tutor 앞에서 멈추고 밖에서 State 를 고쳤다. 사람의 입력이 들어오는 자리는 그래프에 없다</p><p class="go"><span>human_feedback</span>아무 일도 안 하는 노드. 그 앞에서 멈추고, 사람의 입력을 이 노드가 돌려준 값처럼 넣는다 (다음 장)</p><p class=""><span>입력이 없으면</span>State 를 건드리지 않고 <code>stream(null)</code> 로 그냥 이어 간다</p></div></div>
+  <footer><span class="blk">이론 · L3 Editing State</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>그 노드가 쓴 것으로 친다 — asNode</h1>
+  <div class="body tut"><p class="lead">updateState 의 세 번째 인자는 <b>어느 노드가 쓴 값으로 칠지</b>다. 그에 따라 다음 노드가 정해진다</p>
+<svg class="wb" viewBox="0 0 1500 400" role="img"><defs>
+<filter id="roughp3_13" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_13" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_13" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="400" rx="18" fill="#161D26" stroke="#2A3542"/><text x="60" y="40" font-size="19" fill="#8C98A8" text-anchor="start" class="hand">human_feedback 앞에서 멈춘 상태에서</text><text x="700" y="40" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">누가 쓴 것으로 치나</text><text x="1110" y="40" font-size="17" fill="#8C98A8" text-anchor="start" class="hand">다음 노드 · next</text><rect x="60" y="78" width="560" height="64" rx="12" fill="#0F141B" stroke="#3A4553" stroke-width="2"/><text x="80" y="116" font-size="17" fill="#E7ECF2" text-anchor="start" class="lbl">updateState(thread4, 의견)</text><path d="M630,110 L690,110" fill="none" stroke="#8C98A8" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_13)"/><text x="700" y="116" font-size="19" fill="#E7ECF2" text-anchor="start" class="hand">마지막으로 돈 노드(tools)가 쓴 것</text><text x="1110" y="116" font-size="19" fill="#E7ECF2" text-anchor="start" class="lbl">[ &quot;human_feedback&quot; ]</text><text x="1110" y="150" font-size="16" fill="#8C98A8" text-anchor="start" class="hand">tools 다음 자리를 다시 정한다</text><rect x="60" y="208" width="560" height="64" rx="12" fill="#0F141B" stroke="#F2B544" stroke-width="2"/><text x="80" y="246" font-size="17" fill="#F2B544" text-anchor="start" class="lbl">updateState(thread4, 의견, &quot;human_feedback&quot;)</text><path d="M630,240 L690,240" fill="none" stroke="#8C98A8" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_13)"/><text x="700" y="246" font-size="19" fill="#E7ECF2" text-anchor="start" class="hand">human_feedback 이 쓴 것</text><text x="1110" y="246" font-size="19" fill="#F2B544" text-anchor="start" class="lbl">[ &quot;tutor&quot; ]</text><text x="1110" y="280" font-size="16" fill="#8C98A8" text-anchor="start" class="hand">human_feedback 다음 · 의견을 본다</text><text x="60" y="372" font-size="19" fill="#E7ECF2" text-anchor="start" class="hand">어느 노드가 쓴 것으로 칠지가 이어 갈 자리를 정한다</text></svg>
+<div class="say"><p class=""><span>asNode 없이</span>마지막으로 돈 노드가 쓴 것으로 치고, 그 노드 다음 자리를 다시 정한다. 여기서는 tools 다음인 human_feedback</p><p class="go"><span>asNode: "human_feedback"</span>그 노드가 돈 것이 된다. 이어 가면 다음 노드인 tutor 부터 돌고, 모델은 의견을 본다</p></div></div>
+  <footer><span class="blk">이론 · L3 Editing State</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>시연: 멈춘 동안 고치기</h1>
+  <div class="body s17d"><div class="demo4" style="grid-template-columns:repeat(2,1fr)">
+<div class="dc"><span class="no">1</span><b>State 고치기</b><p>tutor 앞에서 멈추고 "아니, meticulous 를" 을 넣는다. 모델은 meticulous 를 찾는다</p><code>updateState</code><span class="ref">노트북 ①</span></div><div class="dc"><span class="no">2</span><b>human_feedback</b><p>하는 일 없는 노드 앞에서 의견을 받는다. asNode 로 넣으면 다음은 tutor</p><code>asNode</code><span class="ref">노트북 ②</span></div>
+</div>
+<p class="nbf"><span>노트북</span><code>demo/tutor-edit-state.ipynb</code><em>앞 노트북과 같은 튜터 Agent · 모델을 부른다</em></p></div>
+  <footer><span class="blk">시연 · L3</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>멈출 자리는 노드 단위로 정한다</h1>
+  <div class="body tut"><p class="lead">정비 Agent 의 tools 앞에서 멈추면 <b>재고 조회마다</b> 묻는다. 되돌리기 어려운 <b>청구만</b> 따로 노드로 뺀다</p>
+<svg class="wb" viewBox="0 0 1500 450" role="img"><defs>
+<filter id="roughp3_14" filterUnits="userSpaceOnUse" x="0" y="0" width="1500" height="520"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+<marker id="aIp3_14" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#E7ECF2" stroke-width="1.6" stroke-linecap="round"/></marker>
+<marker id="aPp3_14" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#F2B544" stroke-width="1.8" stroke-linecap="round"/></marker>
+</defs><rect x="0" y="0" width="1500" height="450" rx="18" fill="#161D26" stroke="#2A3542"/><text x="90" y="177" font-size="20" fill="#8C98A8" text-anchor="middle" class="hand">ask</text><path d="M125,170 L335,170" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_14)"/><rect x="345.0" y="142" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="420" y="178" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">agent</text><path d="M500,158 L805,88" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="10 9" marker-end="url(#aPp3_14)"/><rect x="825.0" y="52" width="150" height="56" rx="12" fill="#1C2531" stroke="#3A4553" stroke-width="2.5"/><text x="900" y="88" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">tools</text><text x="1000" y="86" font-size="18" fill="#8C98A8" text-anchor="start" class="hand">조회 · 대체품 찾기 — 그냥 돈다</text><path d="M500,182 L780,252" fill="none" stroke="#F2B544" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="10 9" marker-end="url(#aPp3_14)"/><rect x="789" y="243" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="803" y="243" width="8" height="34" rx="2" fill="#C97BDC"/><rect x="825.0" y="232" width="150" height="56" rx="12" fill="#1C2531" stroke="#C97BDC" stroke-width="2.5"/><text x="900" y="268" font-size="21" fill="#E7ECF2" text-anchor="middle" class="lbl">order</text><text x="1000" y="266" font-size="18" fill="#C97BDC" text-anchor="start" class="hand">request_part 청구 — 사람을 거친다</text><path d="M900,50 Q640,-5 430,136" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_14)"/><path d="M900,290 Q640,345 430,204" fill="none" stroke="#E7ECF2" stroke-width="2.6" stroke-linecap="round" marker-end="url(#aIp3_14)"/><path d="M50,340 L1450,340" stroke="#3A4553" stroke-width="1.5"/><text x="60" y="385" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">if (last.tool_calls.some((c) =&gt; c.function.name === &quot;request_part&quot;)) return &quot;order&quot;;</text><text x="60" y="417" font-size="18" fill="#E7ECF2" text-anchor="start" class="lbl">.addNode(&quot;order&quot;, orderNode) … .compile({ checkpointer, interruptBefore: [&quot;order&quot;] })</text></svg>
+<div class="say"><p class=""><span>갈림길</span><code>route</code> 가 청구 요청이면 <code>order</code>, 다른 도구면 <code>tools</code> 로 보낸다. 하는 일은 둘이 같다</p><p class="go"><span>멈추기</span><code>interruptBefore: ["order"]</code>. 조회는 그냥 돌고, 청구 앞에서만 사람을 거친다</p></div></div>
+  <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
+</section>
+
+<section class="slide" data-gen="pm2lab">
+  <h1>실습: 정비 부품 Agent 에 사람 끼우기</h1>
+  <div class="body labov"><div class="lab4" style="grid-template-columns:repeat(4,1fr)">
+<div class="c"><span class="no">14</span><b>진행 상황 보기</b><p>invoke 대신 stream 으로 부르고, 노드가 끝날 때마다 바뀐 필드를 찍는다</p><code>streamMode: "updates"</code></div>
+<div class="c"><span class="no">15</span><b>토큰 스트리밍</b><p>agent 가 쓰는 답을 토큰 단위로 흘려보내고, 진행 상황과 함께 받는다</p><code>config.writer · "custom"</code></div>
+<div class="c"><span class="no">16</span><b>청구 전에 멈추기</b><p>request_part 도구와 order 노드를 더하고, 청구 앞에서 멈춰 y / n 을 묻는다</p><code>interruptBefore</code></div>
+<div class="c"><span class="no">17</span><b>담당자 의견 넣기</b><p>y 가 아니면 청구하지 않고, 담당자의 말을 State 에 넣어 다시 판단하게 한다</p><code>updateState · asNode</code></div>
+</div>
+<p class="take">시작 파일 <code>lab/pm/agent3.ts</code> · <code>pnpm pm3</code> — 오후 ② 까지의 Agent 가 들어 있다. <code>// 실습 14 ~ 17</code> 자리에 넣는다 — <b>청구 앞에서 사람을 거친다</b></p></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide" data-gen="pm2lab">
+  <h1>실습 14 · 진행 상황 보기</h1>
+  <div class="body task"><p class="q"><b>invoke 대신 stream</b> 으로 부르세요. 노드가 끝날 때마다 노드 이름과 그 노드가 바꾼 필드를 찍습니다</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① <code>graph.invoke({ question }, thread1)</code> 을 <code>for await (const chunk of await graph.stream({ question }, { ...thread1, streamMode: "updates" }))</code> 로</p><p>② 받을 때마다 <code>[STREAM] 노드 → 필드들</code> 을 찍는다. agent 가 도구를 요청했으면 도구 이름도</p><p>③ 다 돈 뒤 답과 재고표는 <code>(await graph.getState(thread1)).values</code> 에서 꺼낸다</p></div>
+<div class="c"><small>성공하면</small><pre>[STREAM] ask   → messages
+[STREAM] agent → messages · steps  (도구 요청 get_maintenance_plan)
+[STREAM] tools → messages · facts · stock
+[STREAM] agent → messages · steps  (도구 요청 check_stock, …)
+  …
+[STREAM] agent → messages · steps · answer
+[답]   TR-1023 … PN-4471 브레이크 패드 1개 부족 …
+
+<span class="dim">[NODE] · [TOOL] 은 노드 안의 로그, [STREAM] 은 부른 쪽이 받은 것</span></pre></div>
+</div>
+<div class="ans"><span>정답 · lab/pm/answers/14.ts</span><pre><span class="nw">function progress(chunk: Record&lt;string, any&gt;) {
+  for (const [node, update] of Object.entries(chunk)) {
+    const asked = update.messages?.at(-1)?.tool_calls?.map((c: any) =&gt; c.function.name);
+    console.log(`[STREAM] ${node.padEnd(5)} → ${Object.keys(update).join(&quot; · &quot;)}${asked?.length ? `  (도구 요청 ${asked.join(&quot;, &quot;)})` : &quot;&quot;}`);
+  }
+}</span>
+
+const thread1 = { configurable: { thread_id: &quot;1&quot; } };
+for (const question of [input.messages[1].content, &quot;부족한 부품은 언제 들어와?&quot;]) {
+  <span class="nw">for await (const chunk of await graph.stream({ question }, { ...thread1, streamMode: &quot;updates&quot; })) progress(chunk);
+  const { answer, stock } = (await graph.getState(thread1)).values;   // 다 돈 뒤의 State</span>
+  console.log(&quot;[답]  &quot;, answer);
+  console.log(&quot;[재고]&quot;, stock);
+}</pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide" data-gen="pm2lab">
+  <h1>실습 15 · 토큰 스트리밍</h1>
+  <div class="body task"><p class="q">agent 가 쓰는 답을 <b>토큰 단위로</b> 흘려보내세요. 받는 쪽은 진행 상황과 토큰을 <b>한 루프에서</b> 받습니다</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① <code>chat()</code> 의 body 에 <code>stream: true</code>. 응답은 <code>return readStream(res, onToken)</code> — SSE 를 읽는 일은 <code>lib/llm.ts</code> 에 준비돼 있다</p><p>② <code>agentNode(state, config)</code> 에서 <code>chat(state.messages, (token) => config.writer?.(token))</code></p><p>③ <code>streamMode: ["updates", "custom"]</code>. 받은 값은 <code>[모드, 값]</code>. custom 이면 <code>process.stdout.write(값)</code>, updates 면 실습 14 처럼</p></div>
+<div class="c"><small>성공하면</small><pre>[NODE] ▶ agent
+[LLM]  보낸 messages 13개
+[STREAM] tools → messages · facts · stock
+[토큰] TR-1023 다음 정기 정비는 200시간 정기 점검, 2026-11-03 입니다.
+- 유압 필터 PN-2208: 필요 1 · 재고 5 → 충분
+  …
+[STREAM] agent → messages · steps · answer
+[답]   TR-1023 다음 정기 정비는 …
+
+<span class="dim">[토큰] 줄은 글자가 써지는 대로 늘어난다. [답] 은 다 돈 뒤 getState 에서 꺼낸 같은 답</span></pre></div>
+</div>
+<div class="ans"><span>정답 · lab/pm/answers/15.ts</span><pre>import { readStream } from &quot;../lib/llm.js&quot;;
+
+async function chat(messages: object[], onToken?: (token: string) =&gt; void) {
+  const res = await fetch(…, { …, body: JSON.stringify({ model: MODEL, messages, tools, temperature: 0.2, <span class="nw">stream: true</span> }) });
+  <span class="nw">return readStream(res, onToken);</span>   // 다 모이면 { role, content, tool_calls }
+}
+
+async function agentNode(state: typeof State.State, <span class="nw">config: LangGraphRunnableConfig</span>) {
+  const reply = await chat(state.messages, <span class="nw">(token) =&gt; config.writer?.(token)</span>);
+  …
+
+<span class="nw">for await (const [mode, value] of await graph.stream({ question }, { ...thread1, streamMode: [&quot;updates&quot;, &quot;custom&quot;] as const })) {
+  if (mode === &quot;custom&quot;) process.stdout.write(value);   // 토큰 — 줄바꿈 없이 이어서
+  else progress(value);
+}</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide" data-gen="pm2lab">
+  <h1>실습 16 · 청구 전에 멈추기</h1>
+  <div class="body task"><p class="q">청구 도구 <b>request_part</b> 를 더하고, 청구 요청은 <b>order</b> 노드로 보내 그 앞에서 멈추세요. 멈추면 청구 내용을 보여 주고 y / n 을 묻습니다</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① <code>request_part</code> 도구 설명과 runTool 한 줄을 더한다 (lab/README.md 에서 복사). system 메시지에 "정비일까지 모자라는 부품은 request_part 로 청구한다."</p><p>② tools 노드의 본문을 <code>runCalls</code> 로 빼고, 그걸 부르는 <code>orderNode</code> 를 하나 더. route 는 청구 요청이면 <code>"order"</code></p><p>③ <code>compile({ checkpointer, interruptBefore: ["order"] })</code>. 이번엔 첫 질문 하나만 묻는다</p><p>④ 다 돈 뒤 <code>getState(thread1).next</code> 에 order 가 있으면 tool_calls 를 찍고 readline 으로 묻는다. y 면 <code>stream(null, …)</code></p></div>
+<div class="c"><small>성공하면</small><pre>[STREAM] agent → messages · steps  (도구 요청 request_part)
+[STREAM] ⏸ 멈춤
+[멈춤] request_part {&quot;part_no&quot;:&quot;PN-4471&quot;,&quot;qty&quot;:1}
+청구할까요? (y/n) y
+[NODE] ▶ order
+[TOOL] request_part(…) → {&quot;청구번호&quot;:&quot;REQ-0001&quot;, …}
+[STREAM] order → messages · facts · stock
+[STREAM] agent → messages · steps · answer
+
+<span class="dim">n 이면 &quot;[멈춤] 승인하지 않았다&quot; — 청구 직전에 멈춘 채로 남는다</span></pre></div>
+</div>
+<div class="ans"><span>정답 · lab/pm/answers/16.ts</span><pre>  <span class="nw">if (last.tool_calls.some((c: any) =&gt; c.function.name === &quot;request_part&quot;)) return &quot;order&quot;;</span>
+<span class="nw">function orderNode(state: typeof State.State) { console.log(&quot;[NODE] ▶ order&quot;); return runCalls(state); }</span>
+  <span class="nw">.addNode(&quot;order&quot;, orderNode)</span> …  <span class="nw">.addConditionalEdges(&quot;agent&quot;, route, [&quot;tools&quot;, &quot;order&quot;, END]).addEdge(&quot;order&quot;, &quot;agent&quot;)</span>
+  <span class="nw">.compile({ checkpointer: new MemorySaver(), interruptBefore: [&quot;order&quot;] });</span>
+<span class="nw">async function run(input: object | null) { for await (const chunk of await graph.stream(input, { ...thread1, streamMode: &quot;updates&quot; })) progress(chunk); }
+await run({ question: input.messages[1].content });
+while ((await graph.getState(thread1)).next.includes(&quot;order&quot;)) {
+  const calls = (await graph.getState(thread1)).values.messages.at(-1).tool_calls;
+  for (const c of calls) console.log(`[멈춤] ${c.function.name} ${c.function.arguments}`);
+  if ((await rl.question(&quot;청구할까요? (y/n) &quot;)).trim() !== &quot;y&quot;) { console.log(&quot;[멈춤] 승인하지 않았다 …&quot;); break; }
+  await run(null);
+}</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide" data-gen="pm2lab">
+  <h1>실습 17 · 담당자 의견 넣기</h1>
+  <div class="body task"><p class="q">y 가 아니면 청구하지 말고, 담당자의 말을 <b>청구 결과로</b> State 에 넣으세요. agent 가 그 말을 보고 다시 판단합니다</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① 묻는 말을 <code>청구할까요? (y / 아니면 담당자 의견)</code> 으로</p><p>② y 가 아니면 <code>updateState(thread1, { messages: [...] }, "order")</code>. 청구 요청마다 <code>role: "tool"</code> 결과로 <code>{ 결과: "청구하지 않았습니다. 담당자 의견: …" }</code></p><p>③ 그다음 <code>run(null)</code>. 다시 청구하면 또 멈춘다 — while 이 그대로 받는다</p></div>
+<div class="c"><small>성공하면</small><pre>[멈춤] request_part {&quot;part_no&quot;:&quot;PN-4471&quot;,&quot;qty&quot;:1}
+청구할까요? (y / 아니면 담당자 의견) 2개만 청구해
+[STREAM] agent → messages · steps  (도구 요청 request_part)
+[STREAM] ⏸ 멈춤
+[멈춤] request_part {&quot;part_no&quot;:&quot;PN-4471&quot;,&quot;qty&quot;:2}
+청구할까요? (y / 아니면 담당자 의견) y
+[TOOL] request_part(…) → {&quot;청구번호&quot;:&quot;REQ-0001&quot;, &quot;수량&quot;:2, …}
+
+<span class="dim">order 는 첫 번에는 돌지 않았다. 담당자의 말이 그 자리를 채웠다</span></pre></div>
+</div>
+<div class="ans"><span>정답 · lab/pm/answers/17.ts</span><pre>while ((await graph.getState(thread1)).next.includes(&quot;order&quot;)) {
+  const calls = …;  …[멈춤] 찍기…
+  <span class="nw">const reply = (await rl.question(&quot;청구할까요? (y / 아니면 담당자 의견) &quot;)).trim();
+  if (reply !== &quot;y&quot;) {
+    // 청구하지 않고, 담당자의 말을 도구 결과로 넣는다. order 노드가 돈 것으로 친다
+    await graph.updateState(thread1, {
+      messages: calls.map((c: any) =&gt; ({ role: &quot;tool&quot;, tool_call_id: c.id,
+        content: JSON.stringify({ 결과: `청구하지 않았습니다. 담당자 의견: ${reply}` }) })),
+    }, &quot;order&quot;);
+  }</span>
+  await run(null);
+}</pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>오후 ③ 정리</h1>
+  <div class="body sum"><div class="sum3">
+<div class="c"><span class="no">1</span><b>진행 상황 보기</b><p>stream 으로 부르면 노드가 끝날 때마다 값이 온다. updates 는 바뀐 것만, values 는 State 전체. 글자는 노드가 writer 로 흘려보낸다</p></div>
+<div class="c"><span class="no">2</span><b>멈추고 이어 가기</b><p>interruptBefore 로 정해 둔 노드 앞에서 멈춘다. getState 로 멈춘 자리를 보고, 같은 thread 에 null 을 넣으면 이어 간다</p></div>
+<div class="c"><span class="no">3</span><b>고쳐서 이어 가기</b><p>멈춘 동안 updateState 로 State 를 고친다. asNode 로 어느 노드가 쓴 것으로 칠지 정하면 이어 갈 자리가 정해진다</p></div>
+</div>
+<p class="next"><span>다음 · 16:00</span>오후 ④ 스스로 멈추고, 되돌아가고, 꽂는다<em>멈출지는 노드가 정하고, 지난 checkpoint 에서 다시 돌리고, 그래프를 노드로 꽂는다</em></p></div>
+  <footer><span class="blk">정리 · 5분</span><span class="num"></span></footer>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+<div id="bar"></div>
+<div id="hint">← → 이동 (실습 장은 → 가 먼저 정답 공개) · O 전체보기 · F 전체화면</div>
+<div id="overview"><h2>전체보기 — 장을 누르면 그 장으로 (O 또는 Esc 로 닫기)</h2><div class="grid"></div></div>
+<script>
+const slides=[...document.querySelectorAll('#stage .slide')], N=slides.length;
+slides.forEach((s,k)=>{const n=s.querySelector('footer .num'); if(n) n.textContent=`${k+1} / ${N}`;});
+let cur=0;
+const stage=document.getElementById('stage'), ov=document.getElementById('overview'), bar=document.getElementById('bar');
+function fit(){const s=Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform=`translate(-50%,-50%) scale(${s})`;}
+function go(i, push=true){cur=Math.max(0,Math.min(N-1,i)); slides.forEach(s=>s.querySelectorAll('.ans.shown').forEach(a=>a.classList.remove('shown'))); slides.forEach((s,k)=>s.classList.toggle('on',k===cur)); bar.style.width=((cur+1)/N*100)+'%'; if(push) history.replaceState(null,'','#'+(cur+1)); document.title=`${cur+1}/${N} · ${slides[cur].querySelector('h1').textContent}`;}
+function next(){const a=slides[cur].querySelector('.ans:not(.shown)'); if(a) a.classList.add('shown'); else go(cur+1);}
+function openOverview(){const g=ov.querySelector('.grid'); g.innerHTML=''; slides.forEach((s,k)=>{const c=document.createElement('div'); c.className='cell'+(k===cur?' cur':''); const m=document.createElement('div'); m.className='mini'; const clone=s.cloneNode(true); clone.classList.add('on'); m.appendChild(clone); c.appendChild(m); const n=document.createElement('div'); n.className='n'; n.textContent=k+1; const t=document.createElement('div'); t.className='t'; t.textContent=s.querySelector('h1').textContent; c.appendChild(t); c.appendChild(n); c.onclick=(e)=>{e.stopPropagation(); go(k); closeOverview();}; g.appendChild(c);}); ov.classList.add('on'); requestAnimationFrame(scaleCells); setTimeout(()=>{const cc=g.querySelector('.cell.cur'); cc&&cc.scrollIntoView({block:'center'});},0);}
+function scaleCells(){ov.querySelectorAll('.cell').forEach(c=>{const w=c.clientWidth; c.querySelector('.mini').style.transform=`scale(${w/1920})`;});}
+function closeOverview(){ov.classList.remove('on');}
+stage.addEventListener('click',(e)=>{const r=stage.getBoundingClientRect(); if(e.clientX < r.left + r.width/2) go(cur-1); else next();});
+ov.addEventListener('click',closeOverview);
+addEventListener('keydown',(e)=>{
+  if(e.key==='o'||e.key==='O'){ov.classList.contains('on')?closeOverview():openOverview(); return;}
+  if(e.key==='Escape'){closeOverview(); return;}
+  if(ov.classList.contains('on')) return;
+  if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault(); next();}
+  else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault(); go(cur-1);}
+  else if(e.key==='Home') go(0); else if(e.key==='End') go(N-1);
+  else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+});
+addEventListener('resize',()=>{fit(); if(ov.classList.contains('on')) scaleCells();});
+addEventListener('hashchange',()=>{const n=(parseInt(location.hash.slice(1))||1)-1; if(n!==cur) go(n,false);});
+fit(); go((parseInt(location.hash.slice(1))||1)-1,false);
+if(window.mermaid){mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'loose',htmlLabels:false,flowchart:{curve:'linear',htmlLabels:false,padding:14,nodeSpacing:40,rankSpacing:50},themeVariables:{background:'#0F141B',primaryColor:'#1C2531',primaryTextColor:'#E7ECF2',primaryBorderColor:'#3A4553',lineColor:'#8C98A8',secondaryColor:'#161D26',tertiaryColor:'#161D26',edgeLabelBackground:'#0F141B',fontFamily:'IBM Plex Sans KR, sans-serif',fontSize:'20px'}}); stage.classList.add('prerender'); (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>mermaid.run({querySelector:'pre.mermaid'})).then(()=>{document.querySelectorAll('pre.mermaid').forEach(p=>p.style.color='inherit');}).finally(()=>stage.classList.remove('prerender'));}
+</script>
+</body>
+</html>

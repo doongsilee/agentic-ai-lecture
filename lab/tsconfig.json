@@ -15,7 +15,6 @@
   "include": [
     "lib",
     "am",
-    "studio",
     "pm"
   ]
 }

@@ -13,9 +13,11 @@
     "agent": "tsx am/agent.ts",
     "agent:limit": "MAX_STEPS=1 tsx am/agent.ts",
     "typecheck": "tsc --noEmit",
-    "studio": "langgraphjs dev --port 2024",
     "pm": "tsx pm/agent.ts",
-    "pm:limit": "MAX_STEPS=1 tsx pm/agent.ts"
+    "pm:limit": "MAX_STEPS=1 tsx pm/agent.ts",
+    "pm2": "tsx pm/agent2.ts",
+    "pm3": "tsx pm/agent3.ts",
+    "pm4": "tsx pm/agent4.ts"
   },
   "dependencies": {
     "@langchain/core": "1.2.14",
@@ -23,7 +25,6 @@
     "dotenv": "^16.4.0"
   },
   "devDependencies": {
-    "@langchain/langgraph-cli": "1.5.1",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
