@@ -8,6 +8,6 @@
  */
 import { API_KEY, BASE_URL, MODEL } from "../lib/env.js"; // .env 의 접속 정보
 
-// 실습 1: 장표의 두 문장으로 messages 를 직접 만들고, LLM 을 한 번 불러 받은 답과 토큰 수를 찍는다
+// 실습 1: 장표의 두 문장으로 messages 를 직접 만들고, LLM 을 부르는 chat(messages) 함수를 만들어 한 번 부른다 (실습 2 부터 그대로 쓴다)
 
 console.log({ BASE_URL, MODEL, 키: API_KEY ? "있음" : "없음 (mock)" });

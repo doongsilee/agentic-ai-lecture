@@ -26,8 +26,8 @@ pnpm agent
 
 | 실습 | 할 일 | 성공하면 |
 |---|---|---|
-| 1 · LLM 부르기 | 두 문장으로 `messages` 를 직접 만든다 — 모델에게 줄 역할 "너는 공군 정비대대의 부품 담당이다. 짧게 답한다." · 물어볼 것 "브레이크 패드는 보통 언제 교체해?". 그걸 실어 LLM 을 한 번 부른다. `POST ${BASE_URL}/chat/completions`, 헤더 `Authorization: Bearer ${API_KEY}`, body 에 `model` 과 `messages`. 받은 답(`choices[0].message`)과 토큰 수(`usage`)를 찍는다 | `{ role: 'assistant', content: '…' }` 와 토큰 수 |
-| 2 · 대화 이어 가기 | 실습 1 의 fetch 를 `chat(messages)` 함수로 묶는다. 받은 답을 `messages` 에 넣고 "방금 답한 내용을 한 줄로 줄여 줘" 를 이어서 묻는다 | 두 번째 답이 첫 답을 줄여 준다. 두 번째 호출의 입력 토큰이 늘어난다 |
+| 1 · LLM 부르기 | 두 문장으로 `messages` 를 직접 만든다 — 모델에게 줄 역할 "너는 공군 정비대대의 부품 담당이다. 짧게 답한다." · 물어볼 것 "브레이크 패드는 보통 언제 교체해?". LLM 을 부르는 `chat(messages)` 함수를 만들어 한 번 부른다. `POST ${BASE_URL}/chat/completions`, 헤더 `Authorization: Bearer ${API_KEY}`, body 에 `model` 과 `messages`. 함수 안에서 입력 토큰 수(`usage.prompt_tokens`)를 찍고, 받은 답(`choices[0].message`)의 `role` · `content` 를 돌려준다 | `[LLM]  보낸 messages 2개 · 입력 토큰 …` 다음 `{ role: 'assistant', content: '…' }` |
+| 2 · 대화 이어 가기 | 실습 1 의 `chat()` 을 그대로 쓴다. 받은 답을 `messages` 에 넣고 "방금 답한 내용을 한 줄로 줄여 줘" 를 이어서 묻는다 | 두 번째 답이 첫 답을 줄여 준다. 두 번째 호출의 입력 토큰이 늘어난다 |
 | 3 · 도구 하나로 한 바퀴 | `get_maintenance_plan(tail_no)` 도구를 만든다 (설명 + `data/maintenance-plans.json` 에서 찾는 함수). body 에 `tools` 를 넣고, `tool_calls` 가 오면 실행해서 `role: "tool"` 로 돌려준 뒤 다시 부른다. 질문: "TR-1023 다음 정기 정비 계획 알려 줘" | `[TOOL]` 줄 다음, 정비일 2026-11-03 과 부품 4종을 말한다 |
 | 4 · 루프 | `check_stock(part_no)` 도구를 더한다 (`data/parts-stock.json`). 한 바퀴를 `for` / `while` 로 감싸고 멈추는 길 두 개를 넣는다: 도구 요청이 없으면 답하고 끝, `MAX_STEPS` 번 불렀으면 내 코드가 끊는다. 질문: "TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?" | 정비 계획 → 부품마다 재고 → 답 (브레이크 패드 부족 · PN-7730 조회 실패). `pnpm agent:limit` 은 1번 부르고 멈춘다 |
 | 5 · 내 도구 만들기 | PN-7730 은 번호가 바뀐 부품이다. `find_substitute(part_no)` 도구를 직접 설계해서 더한다 (`data/substitutes.json`). 설명을 어떻게 쓰면 모델이 알아서 쓸지가 핵심 | 모델이 PN-7730 조회 실패 → 대체품 PN-7731 찾기 → PN-7731 재고 조회를 스스로 이어 간다 |

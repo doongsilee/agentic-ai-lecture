@@ -871,30 +871,31 @@ LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-3
 
 <section class="slide">
   <h1>실습 1 · LLM 부르기</h1>
-  <div class="body task"><p class="q">아래 두 문장으로 <b>messages 를 직접 만들고</b>, LLM 을 한 번 불러 보세요</p>
+  <div class="body task"><p class="q">아래 두 문장으로 <b>messages 를 직접 만들고</b>, LLM 을 부르는 <b>chat(messages) 함수</b>를 만들어 한 번 불러 보세요</p>
 <div class="give">
-<div class="c"><small>보낼 내용</small><p>모델에게 줄 역할 <b>"너는 공군 정비대대의 부품 담당이다. 짧게 답한다."</b></p><p>물어볼 것 <b>"브레이크 패드는 보통 언제 교체해?"</b></p><p>messages 는 <code>{ role, content }</code> 의 배열 · <b>POST</b> <code>${BASE_URL}/chat/completions</code> · 헤더 <code>Authorization: Bearer ${API_KEY}</code> · body 에 <code>model</code> 과 <code>messages</code></p></div>
-<div class="c"><small>성공하면</small><pre>{
+<div class="c"><small>보낼 내용</small><p>모델에게 줄 역할 <b>"너는 공군 정비대대의 부품 담당이다. 짧게 답한다."</b></p><p>물어볼 것 <b>"브레이크 패드는 보통 언제 교체해?"</b></p><p><b>POST</b> <code>${BASE_URL}/chat/completions</code> · 헤더 <code>Authorization: Bearer ${API_KEY}</code> · body 에 <code>model</code> · <code>messages</code></p></div>
+<div class="c"><small>성공하면</small><pre>[LLM]  보낸 messages 2개 · 입력 토큰 50
+{
   role: 'assistant',
   content: '일반적으로 3~5만 km 또는 2~3년 주기로 교체 권장 …'
-}
-{ prompt_tokens: 50, completion_tokens: 304, total_tokens: 354, … }</pre></div>
+}</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/am/answers/1.ts</span><pre><span class="nw">const messages = [
+<div class="ans"><span>정답 · lab/am/answers/1.ts</span><pre><span class="nw">async function chat(messages: object[]) {
+  const res = await fetch(`${BASE_URL}/chat/completions`, {
+    method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
+    body: JSON.stringify({ model: MODEL, messages, temperature: 0.2 }),
+  });
+  const data = await res.json();
+  console.log(`[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`);</span>   <span class="dim">// 이번 호출에 쓴 토큰 수</span>
+  <span class="nw">const { role, content } = data.choices[0].message;</span>   <span class="dim">// 답도 메시지 하나다</span>
+  <span class="nw">return { role, content };</span>                       <span class="dim">// 다시 보낼 건 role · content 뿐</span>
+<span class="nw">}
+
+const messages = [
   { role: "system", content: "너는 공군 정비대대의 부품 담당이다. 짧게 답한다." },</span>   <span class="dim">// 역할 지시</span>
   <span class="nw">{ role: "user", content: "브레이크 패드는 보통 언제 교체해?" },</span>                    <span class="dim">// 질문</span>
 <span class="nw">];
-
-const res = await fetch(`${BASE_URL}/chat/completions`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
-  body: JSON.stringify({ model: MODEL, messages, temperature: 0.2 }),
-});
-const data = await res.json();
-
-const { role, content } = data.choices[0].message;</span>   <span class="dim">// 답도 메시지 하나다</span>
-<span class="nw">console.log({ role, content });
-console.log(data.usage);</span>                            <span class="dim">// 이번 호출에 쓴 토큰 수</span></pre></div></div>
+console.log(await chat(messages));</span></pre></div></div>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
 </section>
 
@@ -902,19 +903,13 @@ console.log(data.usage);</span>                            <span class="dim">// 
   <h1>실습 2 · 대화 이어 가기</h1>
   <div class="body task"><p class="q">첫 답을 받은 뒤 <b>"방금 답한 내용을 한 줄로 줄여 줘"</b> 를 이어서 물어보세요</p>
 <div class="give">
-<div class="c"><small>할 일</small><p>① 실습 1 의 fetch 를 <code>chat(messages)</code> 함수로 묶는다</p><p>② 받은 답을 <code>messages</code> 에 넣고, 새 질문을 붙여 한 번 더 부른다</p><p>모델은 지난 대화를 기억하지 않는다. 기억은 messages 다</p></div>
+<div class="c"><small>할 일</small><p>① 실습 1 의 <code>chat(messages)</code> 를 그대로 쓴다</p><p>② 받은 답을 <code>messages</code> 에 넣고, 새 질문을 붙여 한 번 더 부른다</p><p>모델은 지난 대화를 기억하지 않는다. 기억은 messages 다</p></div>
 <div class="c"><small>성공하면</small><pre>[LLM]  보낸 messages 2개 · 입력 토큰 50
 [답]   일반적으로 10만~20만km 또는 패드 두께가 3mm 이하로 …
 [LLM]  보낸 messages 4개 · 입력 토큰 171
 [답]   주행거리 10~20만km 또는 두께 3mm 이하, 경고음 발생 시 즉시 교체.</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/am/answers/2.ts</span><pre><span class="nw">async function chat(messages: object[]) {</span>
-  const res = await fetch(…);                    <span class="dim">// 실습 1 의 fetch 그대로</span>
-  const data = await res.json();
-  <span class="nw">console.log(`[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`);</span>
-  const { role, content } = data.choices[0].message;
-  <span class="nw">return { role, content };</span>                       <span class="dim">// 다시 보낼 건 role · content 뿐</span>
-<span class="nw">}</span>
+<div class="ans"><span>정답 · lab/am/answers/2.ts</span><pre><span class="dim">// chat() 은 실습 1 그대로</span>
 
 <span class="nw">const first = await chat(messages);
 console.log("[답]  ", first.content);
