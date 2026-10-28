@@ -11,7 +11,7 @@
 :root{--bg:#0F141B;--panel:#161D26;--panel2:#1C2531;--text:#E7ECF2;--muted:#8C98A8;--amber:#F2B544;--line:#2A3542;--mag:#C97BDC;}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans KR",system-ui,sans-serif;overflow:hidden}
-#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center;cursor:pointer;user-select:none}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center}
 .slide{position:absolute;inset:0;padding:72px 96px 64px;display:none;flex-direction:column;background:var(--bg)}
 .slide.on{display:flex}
 #stage.prerender .slide{display:flex;visibility:hidden}#stage.prerender .slide.on{visibility:visible}
@@ -1130,7 +1130,6 @@ function next(){const a=slides[cur].querySelector('.ans:not(.shown)'); if(a) a.c
 function openOverview(){const g=ov.querySelector('.grid'); g.innerHTML=''; slides.forEach((s,k)=>{const c=document.createElement('div'); c.className='cell'+(k===cur?' cur':''); const m=document.createElement('div'); m.className='mini'; const clone=s.cloneNode(true); clone.classList.add('on'); m.appendChild(clone); c.appendChild(m); const n=document.createElement('div'); n.className='n'; n.textContent=k+1; const t=document.createElement('div'); t.className='t'; t.textContent=titleOf(s); c.appendChild(t); c.appendChild(n); c.onclick=(e)=>{e.stopPropagation(); go(k); closeOverview();}; g.appendChild(c);}); ov.classList.add('on'); requestAnimationFrame(scaleCells); setTimeout(()=>{const cc=g.querySelector('.cell.cur'); cc&&cc.scrollIntoView({block:'center'});},0);}
 function scaleCells(){ov.querySelectorAll('.cell').forEach(c=>{const w=c.clientWidth; c.querySelector('.mini').style.transform=`scale(${w/1920})`;});}
 function closeOverview(){ov.classList.remove('on');}
-stage.addEventListener('click',(e)=>{const r=stage.getBoundingClientRect(); if(e.clientX < r.left + r.width/2) go(cur-1); else next();});
 ov.addEventListener('click',closeOverview);
 addEventListener('keydown',(e)=>{
   if(e.key==='o'||e.key==='O'){ov.classList.contains('on')?closeOverview():openOverview(); return;}
