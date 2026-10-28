@@ -18,6 +18,7 @@
     "pm2": "tsx pm/agent2.ts",
     "pm3": "tsx pm/agent3.ts",
     "pm4": "tsx pm/agent4.ts",
+    "step": "node tools/step.mjs",
     "answer": "sh -c 'for f in pm/answers/$0.ts am/answers/$0.ts; do [ -f \"$f\" ] && exec tsx \"$f\"; done; echo \"정답 번호를 붙인다: pnpm answer 16  (1 ~ 20, bonus)\"; exit 1'"
   },
   "dependencies": {

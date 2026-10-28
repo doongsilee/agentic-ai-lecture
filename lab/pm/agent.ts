@@ -5,6 +5,7 @@
  *   돌리기   pnpm pm          (실습 9 는 pnpm pm:limit 도)
  *   문제     강의 장표 · lab/README.md
  *   막히면   GitHub 의 answers 브랜치 → lab/pm/answers/6.ts ~ 9.ts (그 실습을 끝낸 시점의 이 파일)
+ *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
  *
  * 도구 · runTool · chat() 은 오전에 만든 그대로 준비해 두었다. 그래프만 새로 만든다
  */

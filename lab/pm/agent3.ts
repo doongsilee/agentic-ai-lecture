@@ -5,6 +5,7 @@
  *   돌리기   pnpm pm3          (실습 16 부터 readline 으로 물으니 터미널에서 직접 돌린다)
  *   문제     강의 장표 · lab/README.md
  *   막히면   GitHub 의 answers 브랜치 → lab/pm/answers/14.ts ~ 17.ts
+ *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
  */
 import { readFileSync } from "node:fs";
 import readline from "node:readline/promises"; // 실습 16 에서 쓴다 (사람에게 묻기)

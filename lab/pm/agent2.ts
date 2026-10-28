@@ -5,6 +5,7 @@
  *   돌리기   pnpm pm2
  *   문제     강의 장표 · lab/README.md
  *   막히면   GitHub 의 answers 브랜치 → lab/pm/answers/10.ts ~ 13.ts
+ *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
  */
 import { readFileSync } from "node:fs";
 import { Annotation, StateGraph, START, END, MemorySaver } from "@langchain/langgraph"; // MemorySaver 는 실습 12 에서 쓴다

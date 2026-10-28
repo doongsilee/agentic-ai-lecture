@@ -5,6 +5,7 @@
  *   돌리기   pnpm pm4          (실습 18 부터 readline 으로 물으니 터미널에서 직접 돌린다)
  *   문제     강의 장표 · lab/README.md
  *   막히면   GitHub 의 answers 브랜치 → lab/pm/answers/18.ts ~ 20.ts
+ *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
  *
  * 지금은 멈추지 않는다: order 노드가 묻지 않고 바로 청구한다
  */
