@@ -12,23 +12,10 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import readline from "node:readline/promises";
+import { sessionOf } from "./sessions.mjs";
 
 const REPO = "doongsilee/agentic-ai-lecture";
-// 시간마다 실습 번호와 키워 가는 파일
-const SESSIONS = [
-  { from: 1, to: 5, file: "am/agent.ts", answers: "am/answers", run: "pnpm agent" },
-  { from: 6, to: 9, file: "pm/agent.ts", answers: "pm/answers", run: "pnpm pm" },
-  { from: 10, to: 13, file: "pm/agent2.ts", answers: "pm/answers", run: "pnpm pm2" },
-  { from: 14, to: 17, file: "pm/agent3.ts", answers: "pm/answers", run: "pnpm pm3" },
-  { from: 18, to: 20, file: "pm/agent4.ts", answers: "pm/answers", run: "pnpm pm4" },
-];
-
-const step = Number(process.argv.slice(2).find((a) => !a.startsWith("--")));
-const session = SESSIONS.find((s) => step >= s.from && step <= s.to);
-if (!Number.isInteger(step) || !session) {
-  console.error("풀 차례인 실습 번호(1 ~ 20)가 필요합니다. 예: pnpm step 11");
-  process.exit(1);
-}
+const { no: step, session } = sessionOf(process.argv.slice(2), "풀 차례인 실습 번호(1 ~ 20)가 필요합니다. 예: pnpm step 11");
 
 const git = (...args) => execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
 const tryGit = (...args) => { try { return git(...args); } catch { return null; } };
@@ -82,4 +69,4 @@ if (spots.length) {
 } else {
   console.log(`\n실습 ${step} 은 강의 장표를 보고 ${session.file} 에 이어서 만듭니다.`);
 }
-console.log(`지금 상태 확인: ${session.run}`);
+console.log(`지금 상태 확인: pnpm lab ${step}`);

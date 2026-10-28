@@ -523,10 +523,10 @@ const agent = new StateGraph(State)
 <section class="slide" data-gen="pmlab">
   <h1>실습: 오전 Agent 를 LangGraph 로</h1>
   <div class="body labov"><div class="lab4">
-<div class="c"><span class="no">6</span><b>Chain</b><p>State 와 agent 노드 하나. START → agent → END</p><code>pnpm pm</code></div>
+<div class="c"><span class="no">6</span><b>Chain</b><p>State 와 agent 노드 하나. START → agent → END</p><code>pnpm lab 6</code></div>
 <div class="c"><span class="no">7</span><b>Router</b><p>tools 노드와 갈림길. tools 다음은 END</p><code>route</code></div>
 <div class="c"><span class="no">8</span><b>Agent</b><p>선 하나만 바꿔서 결과를 모델에게</p><code>tools → agent</code></div>
-<div class="c"><span class="no">9</span><b>멈춤</b><p>MAX_STEPS 면 내 코드가 조용히 끝낸다</p><code>pnpm pm:limit</code></div>
+<div class="c"><span class="no">9</span><b>멈춤</b><p>MAX_STEPS 면 내 코드가 조용히 끝낸다</p><code>pnpm lab 9 --limit</code></div>
 </div>
 <p class="take">lab/pm/agent.ts 하나를 키워 간다 · 도구 · runTool · chat() 은 오전 그대로 — <b>그래프만 새로 만든다</b></p></div>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
@@ -617,8 +617,8 @@ function route(state: typeof State.State) {
   <h1>실습 9 · 멈춤</h1>
   <div class="body task"><p class="q">모델을 MAX_STEPS 번 불렀으면, 에러가 아니라 <b>내 코드가 조용히</b> 멈추게 하세요</p>
 <div class="give">
-<div class="c"><small>할 일</small><p>① State 에 <code>steps</code> 칸: <b>더하는</b> reducer</p><p>② agent 노드가 <code>steps: 1</code> 을 같이 돌려준다</p><p>③ route: <code>state.steps &gt;= MAX_STEPS</code> 면 END · <code>pnpm pm:limit</code> 으로 확인</p></div>
-<div class="c"><small>성공하면</small><pre>$ pnpm pm:limit      (MAX_STEPS=1)
+<div class="c"><small>할 일</small><p>① State 에 <code>steps</code> 칸: <b>더하는</b> reducer</p><p>② agent 노드가 <code>steps: 1</code> 을 같이 돌려준다</p><p>③ route: <code>state.steps &gt;= MAX_STEPS</code> 면 END · <code>pnpm lab 9 --limit</code> 으로 확인</p></div>
+<div class="c"><small>성공하면</small><pre>$ pnpm lab 9 --limit   (MAX_STEPS=1)
 [NODE] ▶ agent
 [STOP] 모델을 1번 불렀다. route 가 END 로 보낸다
 [끝]   마지막 메시지: assistant (도구 요청) · messages 3개</pre></div>

@@ -2,7 +2,7 @@
  * 1일차 오후 실습 · 정비 부품 담당 Agent 를 LangGraph 로
  *
  * 오전에 만든 Agent 를 그래프로 다시 만든다. 이 파일 하나를 실습 6 ~ 9 마다 키워 간다
- *   돌리기   pnpm pm          (실습 9 는 pnpm pm:limit 도)
+ *   돌리기   pnpm lab <실습 번호>   (예: pnpm lab 6 · 실습 9 는 pnpm lab 9 --limit 도)
  *   문제     강의 장표
  *   막히면   GitHub 의 answers 브랜치 → lab/pm/answers/6.ts ~ 9.ts (그 실습을 끝낸 시점의 이 파일)
  *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)

@@ -10,14 +10,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "agent": "tsx am/agent.ts",
-    "agent:limit": "MAX_STEPS=1 tsx am/agent.ts",
     "typecheck": "tsc --noEmit",
-    "pm": "tsx pm/agent.ts",
-    "pm:limit": "MAX_STEPS=1 tsx pm/agent.ts",
-    "pm2": "tsx pm/agent2.ts",
-    "pm3": "tsx pm/agent3.ts",
-    "pm4": "tsx pm/agent4.ts",
+    "lab": "node tools/lab.mjs",
     "step": "node tools/step.mjs"
   },
   "dependencies": {

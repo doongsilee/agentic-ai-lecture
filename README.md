@@ -21,7 +21,7 @@ https://codespaces.new/doongsilee/agentic-ai-lecture?ref=main
 GitHub 계정만 있으면 됩니다. 위 버튼을 열고 브랜치가 `main` 인지 확인한 뒤 **Create codespace** 를 누르세요.
 
 - 2~3분 뒤 브라우저에 VS Code 가 열리고, 터미널에서 패키지 설치와 `lab/.env` 만들기가 자동으로 끝납니다
-- "준비 끝" 이 보이면 `cd lab && pnpm agent`
+- "준비 끝" 이 보이면 `cd lab && pnpm lab 1`
 - 30분 동안 아무것도 안 하면 잠듭니다. 다시 열면 파일은 그대로입니다
 - 수업 중 강사가 고친 내용은 `git pull` 로 받습니다
 
@@ -35,7 +35,7 @@ cd agentic-ai-lecture/lab
 corepack enable
 pnpm install
 cp .env.example .env      # 키 없이 mock 으로도 흐름은 돈다
-pnpm agent
+pnpm lab 1
 ```
 
 ### 조별 키
@@ -53,13 +53,18 @@ LLM_API_KEY=조별-키
 
 실습 문제와 성공 화면은 강의 장표에 있습니다. 명령은 모두 `lab/` 폴더에서 칩니다.
 
-| 시간 | 실습 | 파일 | 돌리기 |
-|---|---|---|---|
-| 오전 | 1 ~ 5 | `lab/am/agent.ts` | `pnpm agent` · `pnpm agent:limit` |
-| 오후 ① | 6 ~ 9 | `lab/pm/agent.ts` | `pnpm pm` · `pnpm pm:limit` |
-| 오후 ② | 10 ~ 13 | `lab/pm/agent2.ts` | `pnpm pm2` |
-| 오후 ③ | 14 ~ 17 | `lab/pm/agent3.ts` | `pnpm pm3` |
-| 오후 ④ | 18 ~ 20 | `lab/pm/agent4.ts` | `pnpm pm4` |
+```bash
+pnpm lab 11            # 실습 11 을 하는 파일(pm/agent2.ts)을 돌린다
+pnpm lab 9 --limit     # 모델을 한 번만 부르고 멈추는지 보기 (MAX_STEPS=1 · 실습 4 · 9)
+```
+
+| 시간 | 실습 | 파일 |
+|---|---|---|
+| 오전 | 1 ~ 5 | `lab/am/agent.ts` |
+| 오후 ① | 6 ~ 9 | `lab/pm/agent.ts` |
+| 오후 ② | 10 ~ 13 | `lab/pm/agent2.ts` |
+| 오후 ③ | 14 ~ 17 | `lab/pm/agent3.ts` |
+| 오후 ④ | 18 ~ 20 | `lab/pm/agent4.ts` |
 
 - 오전과 오후 ① 은 파일 하나를 실습마다 키워 갑니다
 - 오후 ② ~ ④ 는 시간마다 시작 파일이 따로 있습니다. 파일 안의 `// 실습 N` 자리에 코드를 넣습니다

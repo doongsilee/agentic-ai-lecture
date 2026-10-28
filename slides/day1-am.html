@@ -837,9 +837,9 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
 <div class="c"><span class="no">1</span><b>저장소 열기</b><code>github.com/doongsilee/agentic-ai-lecture</code><p>GitHub 계정으로 로그인</p></div>
 <div class="c"><span class="no">2</span><b>Codespace 만들기</b><p>Code → Codespaces → <b style="font-size:inherit">Create codespace</b></p><code>codespaces.new/doongsilee/agentic-ai-lecture</code></div>
 <div class="c"><span class="no">3</span><b>2~3분 기다리기</b><p>브라우저에 VS Code 가 열리고, 패키지 설치와 .env 만들기까지 자동. 터미널에 "준비 끝"</p></div>
-<div class="c"><span class="no">4</span><b>첫 실행</b><code>cd lab</code><code>pnpm agent</code><p>키 없이도 돈다 (mock)</p></div>
+<div class="c"><span class="no">4</span><b>첫 실행</b><code>cd lab</code><code>pnpm lab 1</code><p>키 없이도 돈다 (mock)</p></div>
 </div>
-<div class="alt"><span>내 노트북에서 할 때 · Node 22 이상</span><code>git clone https://github.com/doongsilee/agentic-ai-lecture.git &amp;&amp; cd agentic-ai-lecture/lab</code><code>corepack enable &amp;&amp; pnpm install &amp;&amp; cp .env.example .env &amp;&amp; pnpm agent</code></div></div>
+<div class="alt"><span>내 노트북에서 할 때 · Node 22 이상</span><code>git clone https://github.com/doongsilee/agentic-ai-lecture.git &amp;&amp; cd agentic-ai-lecture/lab</code><code>corepack enable &amp;&amp; pnpm install &amp;&amp; cp .env.example .env &amp;&amp; pnpm lab 1</code></div></div>
   <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
 </section>
 
@@ -848,10 +848,10 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
   <div class="body slab"><div class="cards3">
 <div class="c"><small>① 키 넣기</small><b>lab/.env 두 줄</b><pre>LLM_MODE=cloud
 LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-32b (OpenRouter). 키가 없으면 mock 으로 흐름만 본다</p></div>
-<div class="c"><small>② 실습 파일</small><b>lab/am/agent.ts 하나</b><p>지금은 접속 정보를 찍는 한 줄뿐이다. 실습마다 이 파일을 키워 간다</p><p>문제와 성공 화면은 다음 장들에 있다</p></div>
-<div class="c"><small>③ 막히면</small><b>answers 브랜치</b><p>GitHub 에서 브랜치를 answers 로 바꾸면 <code>lab/am/answers/1.ts ~ 5.ts</code> — 그 실습을 끝낸 시점의 agent.ts</p></div>
+<div class="c"><small>② 실습 파일</small><b>lab/am/agent.ts 하나</b><p>지금은 접속 정보를 찍는 한 줄뿐이다. 실습마다 이 파일을 키워 간다</p><p>돌리기는 <code>pnpm lab 실습번호</code> · 문제와 성공 화면은 다음 장들에 있다</p></div>
+<div class="c"><small>③ 막히면</small><b>pnpm step 실습번호</b><p><code>pnpm step 3</code> 이면 실습 2 정답이 agent.ts 에 들어가 3번을 풀 차례가 된다. 정답은 GitHub 의 answers 브랜치 <code>lab/am/answers/</code></p></div>
 </div>
-<pre class="out"><span class="dim">$ pnpm agent</span>
+<pre class="out"><span class="dim">$ pnpm lab 1</span>
 { BASE_URL: 'https://openrouter.ai/api/v1', MODEL: 'qwen/qwen3-32b', '키': '있음' }   <span class="dim">← 이게 보이면 준비 끝 (키가 없으면 '없음 (mock)')</span></pre></div>
   <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
 </section>
@@ -961,7 +961,7 @@ const final = await chat(messages);</span></pre></div></div>
 [TOOL] check_stock({"part_no": "PN-4471"}) → {"재고":1,"입고예정":"2026-11-06"}
 [TOOL] check_stock({"part_no": "PN-7730"}) → {"error":"… 조회 실패"}
 [답]   브레이크 패드 부족 · PN-7730 확보 여부 미상 …
-<span class="dim">$ pnpm agent:limit   → [STOP] 모델을 1번 불렀다</span></pre></div>
+<span class="dim">$ pnpm lab 4 --limit   → [STOP] 모델을 1번 불렀다</span></pre></div>
 </div>
 <div class="ans"><span>정답 · lab/am/answers/4.ts</span><pre><span class="dim">// tools 에 check_stock 추가: "부품번호로 지금 창고 재고 수량과 입고 예정일을 조회한다. … 부품마다 한 번씩 부른다."</span>
 <span class="nw">function runTool(name: string, args: any) {
