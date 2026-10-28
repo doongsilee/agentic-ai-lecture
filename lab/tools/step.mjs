@@ -80,6 +80,6 @@ if (spots.length) {
   const w = Math.max(...spots.map((s) => s.at.length));
   spots.forEach((s) => console.log(`  ${s.at.padEnd(w)}  ${s.line.slice(s.line.indexOf("//"))}`));
 } else {
-  console.log(`\n실습 ${step} 은 장표 · lab/README.md 를 보고 ${session.file} 에 이어서 만듭니다.`);
+  console.log(`\n실습 ${step} 은 강의 장표를 보고 ${session.file} 에 이어서 만듭니다.`);
 }
 console.log(`지금 상태 확인: ${session.run}`);

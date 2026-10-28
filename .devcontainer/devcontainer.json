@@ -9,6 +9,6 @@
   "postCreateCommand": "sudo corepack enable && cd lab && corepack install && pnpm install --frozen-lockfile && ([ -f .env ] || cp .env.example .env) && echo '준비 끝. cd lab && pnpm agent'",
   "customizations": {
     "vscode": { "settings": { "files.eol": "\n", "terminal.integrated.defaultProfile.linux": "bash", "terminal.integrated.cwd": "lab" } },
-    "codespaces": { "openFiles": ["lab/README.md", "lab/am/agent.ts"] }
+    "codespaces": { "openFiles": ["README.md"] }
   }
 }

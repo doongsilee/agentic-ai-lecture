@@ -1,7 +1,7 @@
 /**
  * 1일차 오전 실습 · 정비 부품 담당 Agent
  *
- * 이 파일 하나를 실습마다 키워 간다. 실습 문제와 "성공하면 보이는 화면" 은 강의 장표와 lab/README.md 에 있다
+ * 이 파일 하나를 실습마다 키워 간다. 실습 문제와 "성공하면 보이는 화면" 은 강의 장표에 있다
  *   돌리기   pnpm agent
  *   데이터   lab/data/maintenance-plans.json · parts-stock.json · substitutes.json (교육용 합성 자료)
  *   막히면   GitHub 의 answers 브랜치 → lab/am/answers/1.ts ~ 5.ts (그 실습을 끝낸 시점의 이 파일)
