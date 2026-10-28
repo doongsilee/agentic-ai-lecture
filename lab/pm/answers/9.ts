@@ -1,7 +1,7 @@
 /**
  * 실습 9 정답 · 멈춤 — 실습 9 을 끝낸 시점의 lab/pm/agent.ts
  *   State 에 steps 칸(더하기)을 두고, route 에서 MAX_STEPS 면 END
- *   pnpm pm:limit (MAX_STEPS=1) 은 한 번 부르고 [STOP]. recursionLimit 에러가 아니라 조용히 끝난다
+ *   pnpm lab 9 --limit (MAX_STEPS=1) 은 한 번 부르고 [STOP]. recursionLimit 에러가 아니라 조용히 끝난다
  */
 import { readFileSync } from "node:fs";
 import { Annotation, StateGraph, START, END } from "@langchain/langgraph";

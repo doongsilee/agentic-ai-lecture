@@ -6,9 +6,9 @@
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
   "hostRequirements": { "cpus": 2 },
   "containerEnv": { "TZ": "Asia/Seoul", "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0" },
-  "postCreateCommand": "sudo corepack enable && cd lab && corepack install && pnpm install --frozen-lockfile && ([ -f .env ] || cp .env.example .env) && echo '준비 끝. cd lab && pnpm agent'",
+  "postCreateCommand": "sudo corepack enable && cd lab && corepack install && pnpm install --frozen-lockfile && ([ -f .env ] || cp .env.example .env) && echo '준비 끝. cd lab && pnpm lab 1'",
   "customizations": {
     "vscode": { "settings": { "files.eol": "\n", "terminal.integrated.defaultProfile.linux": "bash", "terminal.integrated.cwd": "lab" } },
-    "codespaces": { "openFiles": ["lab/README.md", "lab/am/agent.ts"] }
+    "codespaces": { "openFiles": ["README.md"] }
   }
 }
