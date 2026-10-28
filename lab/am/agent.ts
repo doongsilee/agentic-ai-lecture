@@ -5,6 +5,7 @@
  *   돌리기   pnpm agent
  *   데이터   lab/data/maintenance-plans.json · parts-stock.json · substitutes.json (교육용 합성 자료)
  *   막히면   GitHub 의 answers 브랜치 → lab/am/answers/1.ts ~ 5.ts (그 실습을 끝낸 시점의 이 파일)
+ *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
  */
 import { API_KEY, BASE_URL, MODEL } from "../lib/env.js"; // .env 의 접속 정보
 

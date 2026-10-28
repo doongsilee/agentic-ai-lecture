@@ -17,7 +17,8 @@
     "pm:limit": "MAX_STEPS=1 tsx pm/agent.ts",
     "pm2": "tsx pm/agent2.ts",
     "pm3": "tsx pm/agent3.ts",
-    "pm4": "tsx pm/agent4.ts"
+    "pm4": "tsx pm/agent4.ts",
+    "step": "node tools/step.mjs"
   },
   "dependencies": {
     "@langchain/core": "1.2.14",

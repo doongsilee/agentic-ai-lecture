@@ -40,6 +40,8 @@ pnpm agent
 
 막히면: GitHub 의 **answers 브랜치** → `lab/am/answers/1.ts ~ 5.ts` (그 실습을 끝낸 시점의 `agent.ts`)
 
+**따라잡기:** 앞 실습을 못 끝냈으면 `pnpm step <풀 차례인 실습 번호>` 로 바로 넘어간다. 예를 들어 `pnpm step 3` 은 `am/agent.ts` 에 실습 2 정답을 넣는다 (실습 3 을 풀 차례). 그 시간의 첫 실습 번호(1 · 6 · 10 · 14 · 18)면 시작 파일로 되돌린다. 덮어쓰기 전에 묻고(그 파일에 고친 내용은 사라진다), 끝나면 다음에 고칠 곳을 `파일:줄` 로 찍어 준다. 오후도 같다 — 실습 번호만 넣으면 그 시간의 파일을 알아서 고른다
+
 ## 화면 읽는 법 (정답 코드 기준)
 
 | 줄 | 뜻 |
@@ -70,7 +72,7 @@ pnpm pm:limit    # 실습 9: MAX_STEPS=1 로 돌리기
 | 8 · Agent | 선 **하나만** 바꿔서 도구 결과가 모델에게 돌아가게 한다 | 정비 계획 → 부품마다 재고 → 대체품 → `[답]` (오전 실습 5 와 같은 결과) |
 | 9 · 멈춤 | State 에 `steps` 필드(더하기)를 두고, agent 가 1 씩 더하고, route 에서 `MAX_STEPS` 면 END | `pnpm pm:limit` 이 `[STOP] 모델을 1번 불렀다` 로 조용히 끝난다 (recursionLimit 에러가 아니다) |
 
-힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/6.ts ~ 9.ts`
+힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/6.ts ~ 9.ts`, 따라잡기는 `pnpm step 7` 처럼
 
 ---
 
@@ -89,7 +91,7 @@ pnpm pm2
 | 12 · 이어서 묻기 | `compile({ checkpointer: new MemorySaver() })` 로 바꾸고, `{ configurable: { thread_id: "1" } }` 로 invoke. 같은 thread 로 "부족한 부품은 언제 들어와?" 를 이어서 묻는다 (새 user 메시지 하나만). 끝난 뒤 facts · stock 도 찍어 본다. thread_id "2" 로도 물어 본다 | thread 1 은 `PN-4471 … 2026-11-06 입고 예정`, facts · 재고표도 그대로 남아 있다. thread 2 는 기체번호를 되묻는다 |
 | 13 · 입구와 출구 | State 에 `question` · `answer` 필드. `Input = { question }`, `Output = { answer, stock }` 로 `new StateGraph(State, { input: Input, output: Output })`. 질문을 대화에 넣는 `ask` 노드(처음이면 system 메시지부터)를 START 와 agent 사이에 두고, agent 는 최종 답이면 `answer` 도 돌려준다. 같은 thread 로 `invoke({ question })` 두 번 | `[OUT] [ 'answer', 'stock' ]` 두 번 — messages 는 밖으로 나오지 않는다 |
 
-힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/10.ts ~ 13.ts`
+힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/10.ts ~ 13.ts`, 따라잡기는 `pnpm step 11` 처럼
 
 # 1일차 오후 ③ 실습 — 정비 부품 Agent 에 사람 끼우기
 
@@ -128,7 +130,7 @@ let requests = 0; // 청구번호를 매기는 수
   if (name === "request_part") return { 청구번호: `REQ-${String(++requests).padStart(4, "0")}`, 부품번호: args.part_no, 수량: args.qty, 상태: "청구 접수" };
 ```
 
-힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/14.ts ~ 17.ts`. readline 으로 묻기 때문에 `pnpm pm3` 을 터미널에서 직접 돌린다
+힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/14.ts ~ 17.ts`, 따라잡기는 `pnpm step 15` 처럼. readline 으로 묻기 때문에 `pnpm pm3` 을 터미널에서 직접 돌린다
 
 # 1일차 오후 ④ 실습 — 노드 안에서 묻고, 지난 기록으로 돌아가기
 
@@ -146,4 +148,4 @@ pnpm pm4
 
 `interrupt` · `Command` import, config 를 받는 `run(input, config)`, readline, 정비 계획 · 대체품 자료(`plans` · `substitutes`)는 시작 파일에 준비돼 있다.
 
-힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/18.ts ~ 20.ts` (시작 파일에 넣을 코드만 다르다)
+힌트: 강의 시연과 같은 모양이다. 막히면 answers 브랜치 → `lab/pm/answers/18.ts ~ 20.ts` (시작 파일에 넣을 코드만 다르다), 따라잡기는 `pnpm step 19` 처럼
