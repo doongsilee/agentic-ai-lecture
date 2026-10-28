@@ -4,7 +4,7 @@
  *   두 번째 질문은 새 user 메시지 하나만 넣는다. 앞의 State(messages · facts · stock)에서 이어 간다
  */
 import { readFileSync } from "node:fs";
-import { Annotation, StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
+import { Annotation, StateGraph, START, END, MemorySaver } from "@langchain/langgraph"; // MemorySaver 는 실습 12 에서 쓴다
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
 
 const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
@@ -79,12 +79,15 @@ const State = Annotation.Root({
   steps: Annotation<number>({ reducer: (prev, next) => prev + next, default: () => 0 }), // 모델을 부른 횟수 — 더한다
   facts: Annotation<string[]>({ reducer: (prev, next) => [...prev, ...next], default: () => [] }), // 도구로 확인한 사실 — 이어 붙인다
   stock: Annotation<Record<string, number>>({ reducer: (prev, next) => ({ ...prev, ...next }), default: () => ({}) }), // 부품별 재고표 — 부품번호마다 합친다
+  // 실습 13: question · answer 필드
 });
+
+// 실습 13: 입구 Input · 출구 Output, 그리고 질문을 대화에 넣는 ask 노드를 여기에 만든다
 
 // ── 노드 ① agent: 모델을 부른다 ──
 async function agentNode(state: typeof State.State) {
   console.log("[NODE] ▶ agent");
-  return { messages: [await chat(state.messages)], steps: 1 };
+  return { messages: [await chat(state.messages)], steps: 1 }; // 실습 13: 최종 답(도구 요청이 아니면)이면 answer 도 돌려준다
 }
 
 // ── 노드 ② tools: 도구를 실행하고 결과를 role: "tool" 로 돌려준다 ──
@@ -114,7 +117,7 @@ function route(state: typeof State.State) {
   return "tools";
 }
 
-const graph = new StateGraph(State)
+const graph = new StateGraph(State) // 실습 13: { input: Input, output: Output } 를 넘기고, START → ask → agent 로
   .addNode("agent", agentNode)
   .addNode("tools", toolsNode)
   .addEdge(START, "agent")
@@ -134,3 +137,4 @@ console.log(`[STATE] facts ${out.facts.length}개 · stock`, out.stock); // 앞 
 const thread2 = { configurable: { thread_id: "2" } };
 console.log("[질문] 부족한 부품은 언제 들어와?  (thread 2)");
 show(await graph.invoke({ messages: [input.messages[0], { role: "user", content: "부족한 부품은 언제 들어와?" }] }, thread2));
+// 실습 13: invoke({ question }, thread1) 로 바꿔 두 번 묻고, 나온 필드 이름(Object.keys)과 답 · 재고표를 찍는다

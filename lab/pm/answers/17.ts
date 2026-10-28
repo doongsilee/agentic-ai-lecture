@@ -4,11 +4,11 @@
  *   order 가 돈 것으로 치니까, 이어 가면 agent 가 그 말을 보고 다시 판단한다. 다시 청구하면 또 멈춘다
  */
 import { readFileSync } from "node:fs";
-import readline from "node:readline/promises";
+import readline from "node:readline/promises"; // 실습 16 에서 쓴다 (사람에게 묻기)
 import { Annotation, StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
-import type { LangGraphRunnableConfig } from "@langchain/langgraph";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph"; // 실습 15 에서 쓴다 (노드가 받는 config)
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
-import { readStream } from "../../lib/llm.js";
+import { readStream } from "../../lib/llm.js"; // 실습 15 에서 쓴다 (stream 응답 읽기)
 
 const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
 
@@ -59,8 +59,8 @@ let requests = 0; // 청구번호를 매기는 수
 function runTool(name: string, args: any) {
   if (name === "get_maintenance_plan") return plans[args.tail_no] ? { tail_no: args.tail_no, ...plans[args.tail_no] } : { error: `'${args.tail_no}' 의 정비 계획이 없습니다` };
   if (name === "check_stock") return stock[args.part_no] ? { part_no: args.part_no, ...stock[args.part_no] } : { error: `'${args.part_no}' 는 재고 시스템에 없는 부품번호입니다 (재고 0 이 아니라 조회 실패)` };
-  if (name === "find_substitute") return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };
   if (name === "request_part") return { 청구번호: `REQ-${String(++requests).padStart(4, "0")}`, 부품번호: args.part_no, 수량: args.qty, 상태: "청구 접수" };
+  if (name === "find_substitute") return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };
   return { error: `모르는 도구: ${name}` };
 }
 

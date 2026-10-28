@@ -4,11 +4,11 @@
  *   멈추면 청구 내용을 보여 주고 y / n 을 묻는다. y 면 stream(null) 로 이어 간다. 아니면 멈춘 채로 끝낸다
  */
 import { readFileSync } from "node:fs";
-import readline from "node:readline/promises";
+import readline from "node:readline/promises"; // 실습 16 에서 쓴다 (사람에게 묻기)
 import { Annotation, StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
-import type { LangGraphRunnableConfig } from "@langchain/langgraph";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph"; // 실습 15 에서 쓴다 (노드가 받는 config)
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
-import { readStream } from "../../lib/llm.js";
+import { readStream } from "../../lib/llm.js"; // 실습 15 에서 쓴다 (stream 응답 읽기)
 
 const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
 
@@ -59,8 +59,8 @@ let requests = 0; // 청구번호를 매기는 수
 function runTool(name: string, args: any) {
   if (name === "get_maintenance_plan") return plans[args.tail_no] ? { tail_no: args.tail_no, ...plans[args.tail_no] } : { error: `'${args.tail_no}' 의 정비 계획이 없습니다` };
   if (name === "check_stock") return stock[args.part_no] ? { part_no: args.part_no, ...stock[args.part_no] } : { error: `'${args.part_no}' 는 재고 시스템에 없는 부품번호입니다 (재고 0 이 아니라 조회 실패)` };
-  if (name === "find_substitute") return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };
   if (name === "request_part") return { 청구번호: `REQ-${String(++requests).padStart(4, "0")}`, 부품번호: args.part_no, 수량: args.qty, 상태: "청구 접수" };
+  if (name === "find_substitute") return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };
   return { error: `모르는 도구: ${name}` };
 }
 
@@ -196,6 +196,7 @@ await run({ question: input.messages[1].content });
 while ((await graph.getState(thread1)).next.includes("order")) {         // order 앞에서 멈춰 있다
   const calls = (await graph.getState(thread1)).values.messages.at(-1).tool_calls;
   for (const c of calls) console.log(`[멈춤] ${c.function.name} ${c.function.arguments}`);
+  // 실습 17: y 가 아니면 담당자 의견을 도구 결과로 updateState(thread1, { messages }, "order") 로 넣고 이어 간다
   if ((await rl.question("청구할까요? (y/n) ")).trim() !== "y") {
     console.log("[멈춤] 승인하지 않았다. 청구 직전에 멈춘 채로 둔다");
     break;

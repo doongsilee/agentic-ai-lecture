@@ -4,7 +4,7 @@
  *   ask 노드가 질문을 대화에 넣는다 (처음이면 system 메시지부터). 같은 thread 로 이어서 물을 수 있다
  */
 import { readFileSync } from "node:fs";
-import { Annotation, StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
+import { Annotation, StateGraph, START, END, MemorySaver } from "@langchain/langgraph"; // MemorySaver 는 실습 12 에서 쓴다
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
 
 const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
