@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lab": "node tools/lab.mjs",
     "step": "node tools/step.mjs",
-    "answer": "sh -c 'for f in pm/answers/$0.ts am/answers/$0.ts; do [ -f \"$f\" ] && exec tsx \"$f\"; done; echo \"정답 번호를 붙인다: pnpm answer 16  (1 ~ 20, bonus)\"; exit 1'"
+    "answer": "sh -c 'for f in pm/answers/$0.ts am/answers/$0.ts; do [ -f \"$f\" ] && exec tsx \"$f\"; done; echo \"정답 번호를 붙인다: pnpm answer 18  (1 ~ 22)\"; exit 1'"
   },
   "dependencies": {
     "@langchain/core": "1.2.14",

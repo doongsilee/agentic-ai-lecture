@@ -54,17 +54,16 @@ LLM_API_KEY=조별-키
 실습 문제와 성공 화면은 강의 장표에 있습니다. 명령은 모두 `lab/` 폴더에서 칩니다.
 
 ```bash
-pnpm lab 11            # 실습 11 을 하는 파일(pm/agent2.ts)을 돌린다
-pnpm lab 9 --limit     # 모델을 한 번만 부르고 멈추는지 보기 (MAX_STEPS=1 · 실습 4 · 9)
+pnpm lab 13            # 실습 13 을 하는 파일(pm/agent2.ts)을 돌린다
 ```
 
 | 시간 | 실습 | 파일 |
 |---|---|---|
-| 오전 | 1 ~ 5 | `lab/am/agent.ts` |
-| 오후 ① | 6 ~ 9 | `lab/pm/agent.ts` |
-| 오후 ② | 10 ~ 13 | `lab/pm/agent2.ts` |
-| 오후 ③ | 14 ~ 17 | `lab/pm/agent3.ts` |
-| 오후 ④ | 18 ~ 20 | `lab/pm/agent4.ts` |
+| 오전 | 1 ~ 7 | `lab/am/agent.ts` |
+| 오후 ① | 8 ~ 11 | `lab/pm/agent.ts` |
+| 오후 ② | 12 ~ 15 | `lab/pm/agent2.ts` |
+| 오후 ③ | 16 ~ 19 | `lab/pm/agent3.ts` |
+| 오후 ④ | 20 ~ 22 | `lab/pm/agent4.ts` |
 
 - 오전과 오후 ① 은 파일 하나를 실습마다 키워 갑니다
 - 오후 ② ~ ④ 는 시간마다 시작 파일이 따로 있습니다. 파일 안의 `// 실습 N` 자리에 코드를 넣습니다
@@ -77,17 +76,17 @@ pnpm lab 9 --limit     # 모델을 한 번만 부르고 멈추는지 보기 (MAX
 **따라잡기:** `pnpm step <풀 차례인 실습 번호>`
 
 ```bash
-pnpm step 11      # pm/agent2.ts 에 실습 10 정답을 넣는다 → 11번을 풀 차례
-pnpm step 10      # 오후 ② 시작 파일로 되돌린다 (그 시간의 첫 실습 번호면 시작 파일로)
+pnpm step 13      # pm/agent2.ts 에 실습 12 정답을 넣는다 → 13번을 풀 차례
+pnpm step 12      # 오후 ② 시작 파일로 되돌린다 (그 시간의 첫 실습 번호면 시작 파일로)
 ```
 
 - 그 시간의 파일을 알아서 고릅니다. 덮어쓰기 전에 묻습니다 (그 파일에 고친 내용은 사라집니다)
 - 끝나면 다음에 고칠 곳을 `파일:줄` 로 찍어 줍니다. VS Code 터미널에서 Ctrl+클릭하면 그 줄로 갑니다
 
-**정답 보기:** `answers` 브랜치의 `lab/am/answers/1.ts ~ 5.ts`, `lab/pm/answers/6.ts ~ 20.ts` (그 실습을 끝낸 시점의 파일). GitHub 에서 브랜치를 `answers` 로 바꿔 보거나 아래처럼 봅니다.
+**정답 보기:** `answers` 브랜치의 `lab/am/answers/1.ts ~ 7.ts`, `lab/pm/answers/8.ts ~ 22.ts` (그 실습을 끝낸 시점의 파일). GitHub 에서 브랜치를 `answers` 로 바꿔 보거나 아래처럼 봅니다.
 
 ```bash
-git show origin/answers:lab/pm/answers/11.ts
+git show origin/answers:lab/pm/answers/13.ts
 ```
 
 ---
@@ -111,6 +110,6 @@ git show origin/answers:lab/pm/answers/11.ts
 
 | 폴더 | 내용 |
 |---|---|
-| `lab/` | 실습. `am/` 오전 · `pm/` 오후 · `data/` 합성 자료 · `lib/` 접속 정보 · stream 읽기 · `tools/` 따라잡기 |
+| `lab/` | 실습. `am/` 오전 · `pm/` 오후 · `data/` 합성 자료 · `lib/` 접속 정보 · stream 읽기 · `tools/` 따라잡기 · `studio/` 내 그래프를 LangGraph Studio 로 보기 ([README](lab/studio/README.md)) |
 | `slides/` | 강의 장표 (HTML, 브라우저로 열기) |
 | `.devcontainer/` | Codespaces 환경 레시피 |

@@ -2,9 +2,9 @@
  * 1일차 오전 실습 · 정비 부품 담당 Agent
  *
  * 이 파일 하나를 실습마다 키워 간다. 실습 문제와 "성공하면 보이는 화면" 은 강의 장표에 있다
- *   돌리기   pnpm lab <실습 번호>   (예: pnpm lab 1 · 루프를 한 번만 돌리려면 pnpm lab 4 --limit)
+ *   돌리기   pnpm lab <실습 번호>   (예: pnpm lab 1)
  *   데이터   lab/data/maintenance-plans.json · parts-stock.json · substitutes.json (교육용 합성 자료)
- *   막히면   GitHub 의 answers 브랜치 → lab/am/answers/1.ts ~ 5.ts (그 실습을 끝낸 시점의 이 파일)
+ *   막히면   GitHub 의 answers 브랜치 → lab/am/answers/1.ts ~ 7.ts (그 실습을 끝낸 시점의 이 파일)
  *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
  */
 import { API_KEY, BASE_URL, MODEL } from "../lib/env.js"; // .env 의 접속 정보

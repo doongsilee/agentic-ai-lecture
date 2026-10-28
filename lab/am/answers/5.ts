@@ -1,12 +1,13 @@
 /**
- * 실습 5 정답 · 내 도구 만들기 — 실습 5 를 끝낸 시점의 lab/am/agent.ts
- *   find_substitute 도구를 새로 만든다: 설명 · 실행 함수 · runTool 한 줄. 루프는 그대로다
- *   PN-7730 재고 조회가 실패하면, 모델이 스스로 대체품(PN-7731)을 찾아 그 재고를 본다
+ * 실습 5 정답 · 도구 하나 더와 루프 — 실습 5 를 끝낸 시점의 lab/am/agent.ts
+ *   check_stock 도구를 직접 설계해 더하고(설명 · 입력 모양 · 실행 함수), 한 바퀴를 for 로 감싼다
+ *   멈추는 길은 둘: 도구 요청이 없을 때 · MAX_STEPS
  */
-import { readFileSync } from "node:fs";
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
+import planData from "../../data/maintenance-plans.json" with { type: "json" };
+import stockData from "../../data/parts-stock.json" with { type: "json" };
 
-const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
+const MAX_STEPS = 15; // 모델을 부르는 상한. 1 로 바꿔 돌리면 [STOP] 으로 끝나는 걸 볼 수 있다
 
 const tools = [
   {
@@ -25,27 +26,29 @@ const tools = [
       parameters: { type: "object", properties: { part_no: { type: "string", description: "부품번호. 예: PN-4471" } }, required: ["part_no"] },
     },
   },
-  {
-    type: "function",
-    function: {
-      name: "find_substitute",
-      description: "재고 조회에 실패한 부품번호의 대체품(바뀐 부품번호)을 찾는다. 대체품이 있으면 그 번호로 다시 재고를 확인한다.",
-      parameters: { type: "object", properties: { part_no: { type: "string", description: "조회에 실패한 부품번호. 예: PN-7730" } }, required: ["part_no"] },
-    },
-  },
 ];
 
-const plans = JSON.parse(readFileSync(new URL("../../data/maintenance-plans.json", import.meta.url), "utf8"));
-const stock = JSON.parse(readFileSync(new URL("../../data/parts-stock.json", import.meta.url), "utf8"));
-const substitutes = JSON.parse(readFileSync(new URL("../../data/substitutes.json", import.meta.url), "utf8"));
+const plans: Record<string, any> = planData;
+const stock: Record<string, any> = stockData;
+
+// 도구 함수 — 실습 3 · 4 그대로
+function getMaintenancePlan(tail_no: string) {
+  return plans[tail_no] ? { tail_no, ...plans[tail_no] } : { error: `'${tail_no}' 의 정비 계획이 없습니다` };
+}
+
+// 도구 함수 — 실습 5 에서 더한다
+function checkStock(part_no: string) {
+  return stock[part_no] ? { part_no, ...stock[part_no] } : { error: `'${part_no}' 는 재고 시스템에 없는 부품번호입니다 (재고 0 이 아니라 조회 실패)` };
+}
+
+// 도구가 둘이라 이름으로 고른다
 function runTool(name: string, args: any) {
-  if (name === "get_maintenance_plan") return plans[args.tail_no] ? { tail_no: args.tail_no, ...plans[args.tail_no] } : { error: `'${args.tail_no}' 의 정비 계획이 없습니다` };
-  if (name === "check_stock") return stock[args.part_no] ? { part_no: args.part_no, ...stock[args.part_no] } : { error: `'${args.part_no}' 는 재고 시스템에 없는 부품번호입니다 (재고 0 이 아니라 조회 실패)` };
-  if (name === "find_substitute") return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };
+  if (name === "get_maintenance_plan") return getMaintenancePlan(args.tail_no);
+  if (name === "check_stock") return checkStock(args.part_no);
   return { error: `모르는 도구: ${name}` }; // 실패도 결과로 돌려준다
 }
 
-async function chat(messages: object[]) {
+async function chat(messages: object[], tools?: object[]) {
   const res = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
@@ -63,7 +66,7 @@ const messages: object[] = [
 ];
 
 for (let step = 1; ; step++) {
-  const reply = await chat(messages);
+  const reply = await chat(messages, tools);
   messages.push(reply);
 
   if (!reply.tool_calls?.length) { // ① 모델이 "끝"
