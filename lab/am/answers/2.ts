@@ -1,6 +1,6 @@
 /**
  * 실습 2 정답 · 대화 이어 가기 — 실습 2 를 끝낸 시점의 lab/am/agent.ts
- *   fetch 를 chat() 으로 묶고, 받은 답을 messages 에 넣은 뒤 이어서 묻는다
+ *   실습 1 의 chat() 을 그대로 쓴다. 받은 답을 messages 에 넣은 뒤 이어서 묻는다
  */
 import { API_KEY, BASE_URL, MODEL } from "../../lib/env.js";
 
@@ -12,8 +12,8 @@ async function chat(messages: object[]) {
     body: JSON.stringify({ model: MODEL, messages, temperature: 0.2 }),
   });
   const data = await res.json();
-  console.log(`[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`);
-  const { role, content } = data.choices[0].message;
+  console.log(`[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`); // 이번 호출에 쓴 토큰 수
+  const { role, content } = data.choices[0].message; // 답도 메시지 하나다
   return { role, content }; // 다시 보낼 건 role · content 뿐
 }
 
