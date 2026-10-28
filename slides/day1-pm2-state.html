@@ -11,7 +11,7 @@
 :root{--bg:#0F141B;--panel:#161D26;--panel2:#1C2531;--text:#E7ECF2;--muted:#8C98A8;--amber:#F2B544;--line:#2A3542;--mag:#C97BDC;}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans KR",system-ui,sans-serif;overflow:hidden}
-#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center;cursor:pointer;user-select:none}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center}
 .slide{position:absolute;inset:0;padding:72px 96px 64px;display:none;flex-direction:column;background:var(--bg)}
 .slide.on{display:flex}
 #stage.prerender .slide{display:flex;visibility:hidden}#stage.prerender .slide.on{visibility:visible}
@@ -387,17 +387,17 @@ pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:bl
 <section class="slide" data-gen="pm2lab">
   <h1>실습: 정비 부품 Agent 에 State 와 기억 더하기</h1>
   <div class="body labov"><div class="lab4" style="grid-template-columns:repeat(4,1fr)">
-<div class="c"><span class="no">10</span><b>확인한 사실 필드</b><p>도구 결과를 facts 필드에 모은다. 덮어쓰기와 이어 붙이기를 비교한다</p><code>이어 붙이기</code></div>
-<div class="c"><span class="no">11</span><b>부품별 재고표</b><p>재고를 부품번호별 표로 모은다. 합치는 규칙을 직접 만든다</p><code>직접 만든 reducer</code></div>
-<div class="c"><span class="no">12</span><b>이어서 묻기</b><p>checkpointer 를 달고 같은 thread 로 "부족한 부품은 언제 들어와?"</p><code>MemorySaver</code></div>
-<div class="c"><span class="no">13</span><b>입구와 출구</b><p>질문을 넣고 답과 재고표만 받는다. 이어서 물어도 된다</p><code>{ input, output }</code></div>
+<div class="c"><span class="no">12</span><b>확인한 사실 필드</b><p>도구 결과를 facts 필드에 모은다. 덮어쓰기와 이어 붙이기를 비교한다</p><code>이어 붙이기</code></div>
+<div class="c"><span class="no">13</span><b>부품별 재고표</b><p>재고를 부품번호별 표로 모은다. 합치는 규칙을 직접 만든다</p><code>직접 만든 reducer</code></div>
+<div class="c"><span class="no">14</span><b>이어서 묻기</b><p>checkpointer 를 달고 같은 thread 로 "부족한 부품은 언제 들어와?"</p><code>MemorySaver</code></div>
+<div class="c"><span class="no">15</span><b>입구와 출구</b><p>질문을 넣고 답과 재고표만 받는다. 이어서 물어도 된다</p><code>{ input, output }</code></div>
 </div>
-<p class="take">시작 파일 <code>lab/pm/agent2.ts</code> · <code>pnpm lab 실습번호</code> — 오후 ① 까지의 Agent 가 들어 있다. <code>// 실습 10 ~ 13</code> 자리에 넣는다 — <b>State 를 키우고, 그래프에 기억을 단다</b></p></div>
+<p class="take">시작 파일 <code>lab/pm/agent2.ts</code> · <code>pnpm lab 실습번호</code> — 오후 ① 까지의 Agent 가 들어 있다. <code>// 실습 12 ~ 15</code> 자리에 넣는다 — <b>State 를 키우고, 그래프에 기억을 단다</b></p></div>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
 </section>
 
 <section class="slide" data-gen="pm2lab">
-  <h1>실습 10 · 확인한 사실 필드</h1>
+  <h1>실습 12 · 확인한 사실 필드</h1>
   <div class="body task"><p class="q">도구로 확인한 사실을 State 의 <b>facts</b> 필드에 모으세요. 먼저 reducer 없이 돌려 보고, 그다음 reducer 를 답니다</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① State 에 <code>facts</code> 필드 (<code>string[]</code>) — 처음엔 reducer 없이</p><p>② tools 노드가 도구 결과마다 한 줄씩 <code>facts</code> 로도 돌려준다</p><p>③ invoke 뒤에 <code>out.facts</code> 를 찍는다 — 몇 개 남았나?</p><p>④ 이어 붙이는 reducer 를 달고 다시 돌린다</p></div>
@@ -411,7 +411,7 @@ pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:bl
         · check_stock {&quot;part_no&quot;:&quot;PN-2208&quot;} → …   (부품마다)
         · find_substitute {&quot;part_no&quot;:&quot;PN-7730&quot;} → …</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/10.ts</span><pre>const State = Annotation.Root({
+<div class="ans"><span>정답 · lab/pm/answers/12.ts</span><pre>const State = Annotation.Root({
   messages: …, steps: …,
 <span class="nw">  facts: Annotation&lt;string[]&gt;({ reducer: (prev, next) =&gt; [...prev, ...next], default: () =&gt; [] }),</span>
 });
@@ -431,7 +431,7 @@ for (const f of out.facts) console.log(&quot;        ·&quot;, f.length &gt; 90 
 </section>
 
 <section class="slide" data-gen="pm2lab">
-  <h1>실습 11 · 부품별 재고표</h1>
+  <h1>실습 13 · 부품별 재고표</h1>
   <div class="body task"><p class="q">재고 조회 결과를 <b>부품번호별 표</b>로 모으세요. 이어 붙이기 · 더하기로는 안 됩니다. 합치는 규칙을 직접 만듭니다</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① State 에 <code>stock</code> 필드 (<code>Record&lt;string, number&gt;</code>)</p><p>② tools 노드: 재고가 나온 결과만 <code>{ [part_no]: 재고 }</code> 로 돌려준다</p><p>③ reducer 를 직접: 앞의 표에 새 부품을 합친다</p><p>④ invoke 뒤에 <code>out.stock</code> 을 찍는다</p></div>
@@ -444,7 +444,7 @@ for (const f of out.facts) console.log(&quot;        ·&quot;, f.length &gt; 90 
 
 <span class="dim">PN-7730 은 조회 실패라 표에 없다 → 대체품 PN-7731</span></pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/11.ts</span><pre>const State = Annotation.Root({
+<div class="ans"><span>정답 · lab/pm/answers/13.ts</span><pre>const State = Annotation.Root({
   messages: …, steps: …, facts: …,
 <span class="nw">  stock: Annotation&lt;Record&lt;string, number&gt;&gt;({
     reducer: (prev, next) =&gt; ({ ...prev, ...next }),   // 부품번호마다 합친다
@@ -461,7 +461,7 @@ for (const f of out.facts) console.log(&quot;        ·&quot;, f.length &gt; 90 
 </section>
 
 <section class="slide" data-gen="pm2lab">
-  <h1>실습 12 · 이어서 묻기</h1>
+  <h1>실습 14 · 이어서 묻기</h1>
   <div class="body task"><p class="q">첫 질문의 답을 받은 뒤 <b>"부족한 부품은 언제 들어와?"</b> 를 이어서 물어보세요. 기체번호도 부품번호도 다시 말하지 않습니다</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① <code>MemorySaver</code> 를 import 하고 <code>compile({ checkpointer: new MemorySaver() })</code></p><p>② <code>{ configurable: { thread_id: "1" } }</code> 을 invoke 의 두 번째 인자로</p><p>③ 같은 thread 로 두 번째 invoke: 새 user 메시지 하나만 넣는다. 끝난 뒤 facts · stock 도 찍어 본다</p><p>④ thread_id "2" 로도 같은 질문을 해 본다</p></div>
@@ -475,7 +475,7 @@ for (const f of out.facts) console.log(&quot;        ·&quot;, f.length &gt; 90 
 
 <span class="dim">thread 1 은 messages · facts · stock 이 다 이어진다</span></pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/12.ts</span><pre>import { Annotation, StateGraph, START, END, <span class="nw">MemorySaver</span> } from &quot;@langchain/langgraph&quot;;
+<div class="ans"><span>정답 · lab/pm/answers/14.ts</span><pre>import { Annotation, StateGraph, START, END, <span class="nw">MemorySaver</span> } from &quot;@langchain/langgraph&quot;;
 
 const graph = new StateGraph(State)
   …
@@ -494,7 +494,7 @@ show(await graph.invoke({ messages: [input.messages[0], { role: &quot;user&quot;
 </section>
 
 <section class="slide" data-gen="pm2lab">
-  <h1>실습 13 · 입구와 출구</h1>
+  <h1>실습 15 · 입구와 출구</h1>
   <div class="body task"><p class="q">그래프를 쓰는 쪽은 <b>질문 하나</b>를 넣고 <b>답과 재고표</b>만 받게 하세요. 같은 thread 로 이어서 물어도 됩니다</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① State 에 <code>question</code> · <code>answer</code> 필드. <code>Input = { question }</code>, <code>Output = { answer, stock }</code></p><p>② <code>ask</code> 노드: question 을 user 메시지로 넣는다. 대화가 처음이면 system 메시지부터</p><p>③ START → ask → agent. agent 는 최종 답이면 <code>answer</code> 도 돌려준다</p><p>④ <code>new StateGraph(State, { input: Input, output: Output })</code> · <code>invoke({ question }, thread1)</code> 두 번</p></div>
@@ -506,7 +506,7 @@ show(await graph.invoke({ messages: [input.messages[0], { role: &quot;user&quot;
 
 <span class="dim">messages · facts · steps 는 밖으로 나오지 않는다</span></pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/13.ts</span><pre>const State = Annotation.Root({ …, <span class="nw">question: Annotation&lt;string&gt;(), answer: Annotation&lt;string&gt;()</span> });
+<div class="ans"><span>정답 · lab/pm/answers/15.ts</span><pre>const State = Annotation.Root({ …, <span class="nw">question: Annotation&lt;string&gt;(), answer: Annotation&lt;string&gt;()</span> });
 <span class="nw">const Input = Annotation.Root({ question: Annotation&lt;string&gt;() });
 const Output = Annotation.Root({ answer: Annotation&lt;string&gt;(), stock: Annotation&lt;Record&lt;string, number&gt;&gt;() });
 function askNode(state: typeof State.State) {
@@ -583,7 +583,6 @@ function next(){const a=slides[cur].querySelector('.ans:not(.shown)'); if(a) a.c
 function openOverview(){const g=ov.querySelector('.grid'); g.innerHTML=''; slides.forEach((s,k)=>{const c=document.createElement('div'); c.className='cell'+(k===cur?' cur':''); const m=document.createElement('div'); m.className='mini'; const clone=s.cloneNode(true); clone.classList.add('on'); m.appendChild(clone); c.appendChild(m); const n=document.createElement('div'); n.className='n'; n.textContent=k+1; const t=document.createElement('div'); t.className='t'; t.textContent=s.querySelector('h1').textContent; c.appendChild(t); c.appendChild(n); c.onclick=(e)=>{e.stopPropagation(); go(k); closeOverview();}; g.appendChild(c);}); ov.classList.add('on'); requestAnimationFrame(scaleCells); setTimeout(()=>{const cc=g.querySelector('.cell.cur'); cc&&cc.scrollIntoView({block:'center'});},0);}
 function scaleCells(){ov.querySelectorAll('.cell').forEach(c=>{const w=c.clientWidth; c.querySelector('.mini').style.transform=`scale(${w/1920})`;});}
 function closeOverview(){ov.classList.remove('on');}
-stage.addEventListener('click',(e)=>{const r=stage.getBoundingClientRect(); if(e.clientX < r.left + r.width/2) go(cur-1); else next();});
 ov.addEventListener('click',closeOverview);
 addEventListener('keydown',(e)=>{
   if(e.key==='o'||e.key==='O'){ov.classList.contains('on')?closeOverview():openOverview(); return;}
