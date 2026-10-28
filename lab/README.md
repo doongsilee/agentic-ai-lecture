@@ -3,12 +3,11 @@
 시작 방법 · 실습 파일 · 따라잡기는 저장소 맨 위 [README.md](../README.md) 에 있습니다. 실습 문제와 성공 화면은 강의 장표에 있습니다.
 
 ```bash
-pnpm lab 11            # 실습 11 을 하는 파일 돌리기 (1 ~ 5 am/agent.ts · 6 ~ 9 pm/agent.ts · 10 ~ 13 pm/agent2.ts · 14 ~ 17 pm/agent3.ts · 18 ~ 20 pm/agent4.ts)
-pnpm lab 9 --limit     # MAX_STEPS=1 로 (실습 4 · 9)
-pnpm step 11           # 따라잡기: 11번을 풀 차례로
+pnpm lab 13            # 실습 13 을 하는 파일 돌리기 (1 ~ 7 am/agent.ts · 8 ~ 11 pm/agent.ts · 12 ~ 15 pm/agent2.ts · 16 ~ 19 pm/agent3.ts · 20 ~ 22 pm/agent4.ts)
+pnpm step 13           # 따라잡기: 13번을 풀 차례로
 ```
 
-## 실습 16 에서 복사해서 쓰는 코드 · request_part
+## 실습 18 에서 복사해서 쓰는 코드 · request_part
 
 도구를 만드는 법은 오전에 해 봤으니 그대로 복사해서 씁니다.
 

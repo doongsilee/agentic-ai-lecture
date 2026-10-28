@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * tools/step.mjs — 따라잡기. pnpm step 11 = "11번을 풀 차례" 로 바로 넘어간다 (10번까지는 풀린 상태)
- *   그 시간의 실습 파일(am/agent.ts · pm/agent.ts · pm/agent2.ts ~ agent4.ts)에 정답 10 을 덮어쓴다
- *   그 시간의 첫 실습(1 · 6 · 10 · 14 · 18)이면 시작 파일로 되돌린다
+ * tools/step.mjs — 따라잡기. pnpm step 13 = "13번을 풀 차례" 로 바로 넘어간다 (12번까지는 풀린 상태)
+ *   그 시간의 실습 파일(am/agent.ts · pm/agent.ts · pm/agent2.ts ~ agent4.ts)에 정답 12 를 덮어쓴다
+ *   그 시간의 첫 실습(1 · 8 · 12 · 16 · 20)이면 시작 파일로 되돌린다
  *   정답은 answers 브랜치에서 읽는다 (git 이 없으면 GitHub 에서 받는다). 덮어쓰는 파일에 내가 고친 내용은 사라지므로 먼저 묻는다
  *
- * 사용:  pnpm step 11          11번을 풀 차례로 (pm/agent2.ts 에 정답 10)
- *        pnpm step 10          오후 ② 시작 파일로 되돌리기
- *        pnpm step 11 --yes    묻지 않고 바로
+ * 사용:  pnpm step 13          13번을 풀 차례로 (pm/agent2.ts 에 정답 12)
+ *        pnpm step 12          오후 ② 시작 파일로 되돌리기
+ *        pnpm step 13 --yes    묻지 않고 바로
  */
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -15,7 +15,7 @@ import readline from "node:readline/promises";
 import { sessionOf } from "./sessions.mjs";
 
 const REPO = "doongsilee/agentic-ai-lecture";
-const { no: step, session } = sessionOf(process.argv.slice(2), "풀 차례인 실습 번호(1 ~ 20)가 필요합니다. 예: pnpm step 11");
+const { no: step, session } = sessionOf(process.argv.slice(2), "풀 차례인 실습 번호(1 ~ 22)가 필요합니다. 예: pnpm step 13");
 
 const git = (...args) => execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
 const tryGit = (...args) => { try { return git(...args); } catch { return null; } };

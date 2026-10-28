@@ -149,7 +149,7 @@ pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:bl
 .cmp .legend span{font-size:19px;padding:4px 14px;border-radius:999px;background:var(--panel2)}
 .cmp .take{font-size:24px;text-align:center;color:var(--muted)}.cmp .take b{color:var(--text);font-weight:600}
 /* ── 20장 끝 ── */
-/* ── 오후 실습 6~9: 문제 → (→ 키) 정답 공개 ── */
+/* ── 오후 실습 8~11: 문제 → (→ 키) 정답 공개 ── */
 .lab4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;word-break:keep-all}
 .lab4 .c{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px 22px}
 .lab4 .no{font-family:"IBM Plex Mono",monospace;font-size:22px;color:var(--amber);font-weight:600}
@@ -214,7 +214,7 @@ pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:bl
   }
 }</pre>
 <div class="pain4">
-<div class="c"><span class="no">1</span><b>사람 답을 기다리려면</b><p>보너스의 y / n 은 답이 올 때까지 프로그램을 켜 둔다. 점심 먹고 와서 답하면?</p><em>멈췄다 이어 가기</em></div>
+<div class="c"><span class="no">1</span><b>사람 답을 기다리려면</b><p>실습 7 의 y / n 은 답이 올 때까지 프로그램을 켜 둔다. 점심 먹고 와서 답하면?</p><em>멈췄다 이어 가기</em></div>
 <div class="c"><span class="no">2</span><b>갈림길이 늘면</b><p>청구 · 대체품 · 승인 · 질문 종류마다 다르게 가야 한다</p><em>갈림길 처리</em></div>
 <div class="c"><span class="no">3</span><b>중간에 죽으면</b><p>정비 계획 조회부터 다시 해야 한다</p><em>단계마다 저장</em></div>
 <div class="c"><span class="no">4</span><b>지금 어디쯤인지 보려면</b><p>몇 번째 바퀴에서 무엇을 들고 있는지 밖에서 안 보인다</p><em>진행 상황 보기</em></div>
@@ -523,17 +523,17 @@ const agent = new StateGraph(State)
 <section class="slide" data-gen="pmlab">
   <h1>실습: 오전 Agent 를 LangGraph 로</h1>
   <div class="body labov"><div class="lab4">
-<div class="c"><span class="no">6</span><b>Chain</b><p>State 와 agent 노드 하나. START → agent → END</p><code>pnpm lab 6</code></div>
-<div class="c"><span class="no">7</span><b>Router</b><p>tools 노드와 갈림길. tools 다음은 END</p><code>route</code></div>
-<div class="c"><span class="no">8</span><b>Agent</b><p>선 하나만 바꿔서 결과를 모델에게</p><code>tools → agent</code></div>
-<div class="c"><span class="no">9</span><b>멈춤</b><p>MAX_STEPS 면 내 코드가 조용히 끝낸다</p><code>pnpm lab 9 --limit</code></div>
+<div class="c"><span class="no">8</span><b>Chain</b><p>State 와 agent 노드 하나. START → agent → END</p><code>pnpm lab 8</code></div>
+<div class="c"><span class="no">9</span><b>Router</b><p>tools 노드와 갈림길. tools 다음은 END</p><code>route</code></div>
+<div class="c"><span class="no">10</span><b>Agent</b><p>선 하나만 바꿔서 결과를 모델에게</p><code>tools → agent</code></div>
+<div class="c"><span class="no">11</span><b>멈춤</b><p>MAX_STEPS 면 내 코드가 조용히 끝낸다</p><code>MAX_STEPS = 1</code></div>
 </div>
 <p class="take">lab/pm/agent.ts 하나를 키워 간다 · 도구 · runTool · chat() 은 오전 그대로 — <b>그래프만 새로 만든다</b></p></div>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
 </section>
 
 <section class="slide" data-gen="pmlab">
-  <h1>실습 6 · Chain</h1>
+  <h1>실습 8 · Chain</h1>
   <div class="body task"><p class="q">오전의 정비 부품 Agent 를 그래프로 옮긴다. 먼저 <b>State</b> 와 <b>agent 노드 하나</b>로 그래프를 만들어 보세요</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① State: <code>messages</code> 칸 하나, 노드가 돌려준 메시지를 <b>이어 붙이는</b> reducer</p><p>② agent 노드: <code>chat(state.messages)</code> 의 답을 messages 로 돌려준다</p><p>③ START → agent → END 로 잇고 <code>show(await graph.invoke(input))</code></p></div>
@@ -541,7 +541,7 @@ const agent = new StateGraph(State)
 [LLM]  보낸 messages 2개 · 입력 토큰 553
 [끝]   마지막 메시지: assistant (도구 요청) · messages 3개</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/6.ts</span><pre><span class="nw">const State = Annotation.Root({
+<div class="ans"><span>정답 · lab/pm/answers/8.ts</span><pre><span class="nw">const State = Annotation.Root({
   messages: Annotation&lt;any[]&gt;({ reducer: (prev, next) =&gt; [...prev, ...next], default: () =&gt; [] }),
 });
 
@@ -561,7 +561,7 @@ show(await graph.invoke(input));</span></pre></div></div>
 </section>
 
 <section class="slide" data-gen="pmlab">
-  <h1>실습 7 · Router</h1>
+  <h1>실습 9 · Router</h1>
   <div class="body task"><p class="q">도구를 실행할 <b>tools 노드</b>와, 도구냐 답이냐를 고르는 <b>갈림길</b>을 더하세요. tools 다음은 일단 END</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① tools 노드: 마지막 메시지의 <code>tool_calls</code> 를 <code>runTool</code> 로 실행해 <code>role: "tool"</code> 메시지로 돌려준다</p><p>② route: 도구 요청이면 <code>"tools"</code>, 아니면 <code>END</code></p><p>③ <code>addConditionalEdges</code> 와 <code>addEdge("tools", END)</code></p></div>
@@ -570,7 +570,7 @@ show(await graph.invoke(input));</span></pre></div></div>
 [TOOL] get_maintenance_plan({&quot;tail_no&quot;: &quot;TR-1023&quot;}) → {…}
 [끝]   마지막 메시지: tool · messages 4개</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/7.ts</span><pre><span class="nw">function toolsNode(state: typeof State.State) {
+<div class="ans"><span>정답 · lab/pm/answers/9.ts</span><pre><span class="nw">function toolsNode(state: typeof State.State) {
   console.log(&quot;[NODE] ▶ tools&quot;);
   const calls = state.messages.at(-1).tool_calls;
   return { messages: calls.map((call: any) =&gt; {
@@ -584,7 +584,7 @@ function route(state: typeof State.State) {
   return state.messages.at(-1).tool_calls?.length ? &quot;tools&quot; : END;
 }</span>
 
-<span class="dim">// 그래프: 실습 6 의 agent → END 선을 빼고, 세 줄을 더한다</span>
+<span class="dim">// 그래프: 실습 8 의 agent → END 선을 빼고, 세 줄을 더한다</span>
 <span class="nw">  .addNode(&quot;tools&quot;, toolsNode)
   .addConditionalEdges(&quot;agent&quot;, route, [&quot;tools&quot;, END])
   .addEdge(&quot;tools&quot;, END)</span></pre></div></div>
@@ -592,17 +592,17 @@ function route(state: typeof State.State) {
 </section>
 
 <section class="slide" data-gen="pmlab">
-  <h1>실습 8 · Agent</h1>
+  <h1>실습 10 · Agent</h1>
   <div class="body task"><p class="q">선 <b>하나만</b> 바꿔서, 도구 결과가 모델에게 돌아가게 하세요</p>
 <div class="give">
-<div class="c"><small>할 일</small><p>실습 7 그래프에서 tools 다음 갈 곳만 바꾼다. 나머지는 그대로</p><p>강의 시연 ③ 과 같은 한 줄이다</p></div>
+<div class="c"><small>할 일</small><p>실습 9 그래프에서 tools 다음 갈 곳만 바꾼다. 나머지는 그대로</p><p>강의 시연 ③ 과 같은 한 줄이다</p></div>
 <div class="c"><small>성공하면</small><pre>[TOOL] get_maintenance_plan(…)
 [TOOL] check_stock(PN-2208 · PN-4471 · PN-5150 · PN-7730)
 [TOOL] find_substitute({&quot;part_no&quot;: &quot;PN-7730&quot;}) → PN-7731
 [TOOL] check_stock({&quot;part_no&quot;: &quot;PN-7731&quot;}) → 재고 3
 [답]   PN-4471 브레이크 패드만 정비일까지 부족 …</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/8.ts</span><pre>const graph = new StateGraph(State)
+<div class="ans"><span>정답 · lab/pm/answers/10.ts</span><pre>const graph = new StateGraph(State)
   .addNode(&quot;agent&quot;, agentNode)
   .addNode(&quot;tools&quot;, toolsNode)
   .addEdge(START, &quot;agent&quot;)
@@ -614,16 +614,16 @@ function route(state: typeof State.State) {
 </section>
 
 <section class="slide" data-gen="pmlab">
-  <h1>실습 9 · 멈춤</h1>
+  <h1>실습 11 · 멈춤</h1>
   <div class="body task"><p class="q">모델을 MAX_STEPS 번 불렀으면, 에러가 아니라 <b>내 코드가 조용히</b> 멈추게 하세요</p>
 <div class="give">
-<div class="c"><small>할 일</small><p>① State 에 <code>steps</code> 칸: <b>더하는</b> reducer</p><p>② agent 노드가 <code>steps: 1</code> 을 같이 돌려준다</p><p>③ route: <code>state.steps &gt;= MAX_STEPS</code> 면 END · <code>pnpm lab 9 --limit</code> 으로 확인</p></div>
-<div class="c"><small>성공하면</small><pre>$ pnpm lab 9 --limit   (MAX_STEPS=1)
+<div class="c"><small>할 일</small><p>① State 에 <code>steps</code> 칸: <b>더하는</b> reducer</p><p>② agent 노드가 <code>steps: 1</code> 을 같이 돌려준다</p><p>③ route: <code>state.steps &gt;= MAX_STEPS</code> 면 END · <code>MAX_STEPS</code> 를 1 로 바꿔 확인</p></div>
+<div class="c"><small>성공하면</small><pre><span class="dim">MAX_STEPS 를 1 로 바꿔 돌리면</span>
 [NODE] ▶ agent
 [STOP] 모델을 1번 불렀다. route 가 END 로 보낸다
 [끝]   마지막 메시지: assistant (도구 요청) · messages 3개</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/pm/answers/9.ts</span><pre>const State = Annotation.Root({
+<div class="ans"><span>정답 · lab/pm/answers/11.ts</span><pre>const State = Annotation.Root({
   messages: Annotation&lt;any[]&gt;({ reducer: (prev, next) =&gt; [...prev, ...next], default: () =&gt; [] }),
   <span class="nw">steps: Annotation&lt;number&gt;({ reducer: (prev, next) =&gt; prev + next, default: () =&gt; 0 }),</span>
 });

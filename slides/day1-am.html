@@ -469,7 +469,7 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
 .slab pre.out{font-size:19px;line-height:1.5}
 .lab6{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;word-break:keep-all}
 .lab6 .c{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px 20px}
-.lab6.n5{grid-template-columns:repeat(5,1fr)}
+.lab6.n5{grid-template-columns:repeat(5,1fr)}.lab6.n7{grid-template-columns:repeat(4,1fr)}
 .lab6 .c.bonus{border-style:dashed}
 .lab6 .no{font-family:"IBM Plex Mono",monospace;font-size:22px;color:var(--amber);font-weight:600}
 .lab6 b{font-size:25px;font-weight:600;line-height:1.3}
@@ -503,7 +503,7 @@ ol.goals{gap:40px}ol.goals li{font-size:36px;padding-left:76px;gap:10px}ol.goals
 .task .ans{flex:1;min-height:0;position:relative;border:1px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
 .task .ans > span{font-size:18px;font-weight:600;color:var(--amber);padding:14px 24px 0;letter-spacing:.04em}
 .task .ans pre{border:none;background:none;font-size:17px;line-height:1.4;padding:6px 24px 12px}
-.task .ans pre .nw{color:var(--amber)}.task .ans pre .dim{color:#6B7686}
+.task .ans pre.tight{font-size:16px;line-height:1.35}.task .ans pre.tighter{line-height:1.3}.task .ans pre .nw{color:var(--amber)}.task .ans pre .dim{color:#6B7686}
 .task .ans:not(.shown) > *{visibility:hidden}
 .task .ans:not(.shown)::after{content:"정답 · → 키를 누르면 공개";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--muted)}
 .task .ans.shown{border-style:solid;border-color:var(--amber);background:var(--panel)}
@@ -962,12 +962,14 @@ LLM_API_KEY=<span class="amber">조별 키</span></pre><p>모델은 qwen/qwen3-3
 
 <section class="slide">
   <h1>실습: 첫 Agent 만들기</h1>
-  <div class="body slab"><div class="lab6 n5">
+  <div class="body slab"><div class="lab6 n7">
 <div class="c"><span class="no">1</span><b>LLM 부르기</b><p>messages 를 직접 만들어 fetch 한 번</p></div>
 <div class="c"><span class="no">2</span><b>대화 이어 가기</b><p>받은 답을 messages 에 넣고 이어서 묻기</p></div>
-<div class="c"><span class="no">3</span><b>도구 하나로 한 바퀴</b><p>tool_calls → 실행 → role: "tool" → 다시 부르기</p></div>
-<div class="c"><span class="no">4</span><b>루프</b><p>도구를 하나 더 주고, 반복문과 멈추는 길 두 개</p></div>
-<div class="c"><span class="no">5</span><b>내 도구 만들기</b><p>find_substitute 를 직접 설계</p></div>
+<div class="c"><span class="no">3</span><b>도구 알려 주기</b><p>tools 를 보내고, 도구 요청(tool_calls)을 받기</p></div>
+<div class="c"><span class="no">4</span><b>도구 실행하기</b><p>도구 함수를 만들어 실행하고, 결과를 role: "tool" 로 돌려주기</p></div>
+<div class="c"><span class="no">5</span><b>도구 하나 더와 루프</b><p>check_stock 을 직접 설계하고, 반복문과 멈추는 길 두 개</p></div>
+<div class="c"><span class="no">6</span><b>대체품 도구</b><p>조회 실패를 보고 모델이 스스로 대체품을 찾게 find_substitute 설계</p></div>
+<div class="c"><span class="no">7</span><b>사람 승인</b><p>청구 도구를 더하고, 실행 직전에 사람에게 y / n</p></div>
 </div>
 <p class="take">lab/am/agent.ts 하나를 키워 간다 · 소재: 정비대대 부품 담당 Agent — <b>"TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?"</b></p></div>
   <footer><span class="blk">실습 준비</span><span class="num"></span></footer>
@@ -1027,90 +1029,154 @@ console.log("[답]  ", second.content);</span></pre></div></div>
 </section>
 
 <section class="slide">
-  <h1>실습 3 · 도구 하나로 한 바퀴</h1>
-  <div class="body task"><p class="q"><b>get_maintenance_plan</b> 도구를 주고, 모델이 요청하면 실행해서 돌려주세요 · 질문 <b>"TR-1023 다음 정기 정비 계획 알려 줘"</b></p>
+  <h1>실습 3 · 도구 알려 주기</h1>
+  <div class="body task"><p class="q"><b>get_maintenance_plan</b> 도구를 알려 주고, 모델이 도구를 요청하는지 보세요 · 질문 <b>"TR-1023 다음 정기 정비 계획 알려 줘"</b></p>
 <div class="give">
-<div class="c"><small>할 일</small><p>① 도구 설명(<code>tools</code>)과, <code>data/maintenance-plans.json</code> 에서 기체번호로 찾는 함수</p><p>② body 에 <code>tools</code> 를 같이 보내고, 답의 <code>tool_calls</code> 도 받는다</p><p>③ 실행 결과를 <code>role: "tool"</code> 로 넣고 다시 부른다</p></div>
+<div class="c"><small>할 일</small><p>① <code>chat(messages, tools)</code> · tools 를 같이 보내고 <code>tool_calls</code> 도 돌려준다</p><p>② 도구 설명 <code>tools</code> · 이름 · 언제 쓰는지 · 넣을 값</p><p>③ 불러서 답을 찍는다. 도구 함수와 실행은 실습 4</p></div>
+<div class="c"><small>성공하면</small><pre>[LLM]  보낸 messages 2개 · 입력 토큰 381
+{ role: 'assistant', content: null,
+  tool_calls: [ { type: 'function', id: 'call_e5e3',
+    function: { name: 'get_maintenance_plan',
+                arguments: '{"tail_no": "TR-1023"}' } } ] }
+<span class="dim">답(content)은 비어 있고, 도구 요청만 왔다</span></pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/3.ts</span><pre>async function chat(messages: object[]<span class="nw">, tools?: object[]</span>) {                    <span class="dim">// ① tools 파라미터</span>
+  <span class="dim">…</span> body: JSON.stringify({ model: MODEL, messages, <span class="nw">tools,</span> temperature: 0.2 }), <span class="dim">…</span>
+  const { role, content<span class="nw">, tool_calls</span> } = data.choices[0].message;
+  return { role, content<span class="nw">, tool_calls</span> };                                         <span class="dim">// 도구 요청도 돌려준다</span>
+}
+
+<span class="nw">const tools = [{ type: "function", function: {</span>                                 <span class="dim">// ② 도구 설명</span>
+<span class="nw">  name: "get_maintenance_plan",</span>
+<span class="nw">  description: "기체번호로 정기 정비 계획을 조회한다. 정비일과 필요한 부품번호 · 수량이 나온다.",</span>
+<span class="nw">  parameters: { type: "object", properties: { tail_no: { type: "string", description: "기체번호. 예: TR-1023" } }, required: ["tail_no"] },</span>
+<span class="nw">} }];</span>
+
+<span class="nw">const reply = await chat(messages, tools);</span>                                      <span class="dim">// ③ 부르기</span>
+<span class="nw">console.dir(reply, { depth: null });</span>                                             <span class="dim">// 안쪽까지 다 찍는다</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 4 · 도구 실행하기</h1>
+  <div class="body task"><p class="q">도구 함수 <b>getMaintenancePlan</b> 을 만들고, 실습 3 의 요청대로 실행해 돌려주세요 · 질문은 실습 3 그대로</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① 데이터 import · 도구 함수 <code>getMaintenancePlan(tail_no)</code></p><p>② 모델의 답(도구 요청)도 <code>messages</code> 에 넣고, <code>tool_calls[0]</code> 대로 실행</p><p>③ 결과를 <code>role: "tool"</code> 로 넣고 (<code>tool_call_id</code> 로 짝) 다시 부른다</p></div>
 <div class="c"><small>성공하면</small><pre>[LLM]  보낸 messages 2개 · 입력 토큰 381
 [TOOL] get_maintenance_plan({"tail_no": "TR-1023"}) → {"정비일":"2026-11-03", …}
 [LLM]  보낸 messages 4개 · 입력 토큰 575
 [답]   200시간 정기 점검 · 2026년 11월 3일 · 필요 부품 4종 …</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/am/answers/3.ts</span><pre><span class="nw">const tools = [{ type: "function", function: {
-  name: "get_maintenance_plan",
-  description: "기체번호로 정기 정비 계획을 조회한다. 정비일과 필요한 부품번호 · 수량이 나온다.",
-  parameters: { type: "object", properties: { tail_no: { type: "string", description: "기체번호. 예: TR-1023" } }, required: ["tail_no"] },
-} }];
-function getMaintenancePlan(tail_no: string) {
-  return plans[tail_no] ? { tail_no, ...plans[tail_no] } : { error: `'${tail_no}' 의 정비 계획이 없습니다` };
-}</span>
-<span class="dim">// chat(): body 에 tools 추가 · return { role, content, tool_calls }</span>
-const reply = await chat(messages);
-<span class="nw">messages.push(reply);
-for (const call of reply.tool_calls ?? []) {
-  const args = JSON.parse(call.function.arguments);</span>          <span class="dim">// arguments 는 JSON "글자"</span>
-  <span class="nw">const result = getMaintenancePlan(args.tail_no);</span>           <span class="dim">// 실행은 내 코드가 한다</span>
-  <span class="nw">messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
-}
-const final = await chat(messages);</span></pre></div></div>
+<div class="ans"><span>정답 · lab/am/answers/4.ts</span><pre><span class="nw">import planData from "../data/maintenance-plans.json" with { type: "json" };</span>   <span class="dim">// ① 데이터 불러오기</span>
+<span class="nw">const plans: Record&lt;string, any&gt; = planData;</span>                                   <span class="dim">// 기체번호 → 정비 계획</span>
+<span class="nw">function getMaintenancePlan(tail_no: string) {</span>                                 <span class="dim">// 도구 함수: 평범한 함수</span>
+<span class="nw">  return plans[tail_no] ? { tail_no, ...plans[tail_no] } : { error: `'${tail_no}' 의 정비 계획이 없습니다` };</span>
+<span class="nw">}</span>
+
+const reply = await chat(messages, tools);
+<span class="nw">messages.push(reply);</span>                                              <span class="dim">// ② 도구 요청도 대화의 일부다</span>
+<span class="nw">const call = reply.tool_calls[0];</span>                                  <span class="dim">// 이 질문에는 요청이 하나 온다</span>
+<span class="nw">const args = JSON.parse(call.function.arguments);</span>                   <span class="dim">// arguments 는 JSON "글자"</span>
+<span class="nw">const result = getMaintenancePlan(args.tail_no);</span>                    <span class="dim">// 실행은 내 코드가 한다</span>
+<span class="nw">console.log(`[TOOL] ${call.function.name}(${call.function.arguments}) →`, JSON.stringify(result));</span>
+<span class="nw">messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });</span>     <span class="dim">// ③ 결과를 돌려준다</span>
+<span class="nw">const final = await chat(messages, tools);</span>                         <span class="dim">// 결과를 보고 답한다</span>
+<span class="nw">console.log("[답]  ", final.content);</span></pre></div></div>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
 </section>
 
 <section class="slide">
-  <h1>실습 4 · 루프</h1>
-  <div class="body task"><p class="q"><b>check_stock</b> 도구를 더하고, 한 바퀴를 반복문으로 감싸세요 · 질문 <b>"TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?"</b></p>
+  <h1>실습 5 · 도구 하나 더와 루프</h1>
+  <div class="body task"><p class="q"><b>check_stock</b> 도구를 직접 설계하고, 반복문으로 감싸세요 · 질문 <b>"TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?"</b></p>
 <div class="give">
-<div class="c"><small>할 일</small><p>① <code>check_stock(part_no)</code> 도구 (<code>data/parts-stock.json</code>). 없는 번호는 error 를 결과로</p><p>② 멈추는 길 둘: 도구 요청이 없으면 답하고 끝 · <code>MAX_STEPS</code> 번 불렀으면 내 코드가 끊기</p></div>
+<div class="c"><small>할 일</small><p>① 이름 · 설명 · 입력 모양 · 실행 함수 (<code>data/parts-stock.json</code>) · 없는 번호는 error</p><p>② 설명을 어떻게 쓰면 모델이 <b>부품마다</b> 알아서 부를까</p><p>③ 반복문 · 멈추는 길 둘 (요청 없음 · <code>MAX_STEPS</code>) · 요청이 여러 개면 다 실행</p></div>
 <div class="c"><small>성공하면</small><pre>[TOOL] get_maintenance_plan({"tail_no": "TR-1023"}) → …
 [TOOL] check_stock({"part_no": "PN-4471"}) → {"재고":1,"입고예정":"2026-11-06"}
 [TOOL] check_stock({"part_no": "PN-7730"}) → {"error":"… 조회 실패"}
 [답]   브레이크 패드 부족 · PN-7730 확보 여부 미상 …
-<span class="dim">$ pnpm lab 4 --limit   → [STOP] 모델을 1번 불렀다</span></pre></div>
+<span class="dim">MAX_STEPS 를 1 로 바꿔 돌리면 → [STOP] 모델을 1번 불렀다</span></pre></div>
 </div>
-<div class="ans"><span>정답 · lab/am/answers/4.ts</span><pre><span class="dim">// tools 에 check_stock 추가: "부품번호로 지금 창고 재고 수량과 입고 예정일을 조회한다. … 부품마다 한 번씩 부른다."</span>
-<span class="nw">function runTool(name: string, args: any) {
-  if (name === "get_maintenance_plan") return plans[args.tail_no] ? { … } : { error: "정비 계획이 없습니다" };
-  if (name === "check_stock") return stock[args.part_no] ? { … } : { error: "재고 시스템에 없는 부품번호 (조회 실패)" };
-  return { error: `모르는 도구: ${name}` };</span>                          <span class="dim">// 실패도 결과로 돌려준다</span>
-<span class="nw">}
-
-for (let step = 1; ; step++) {</span>
-  const reply = await chat(messages);
-  messages.push(reply);
+<div class="ans"><span>정답 · lab/am/answers/5.ts</span><pre class="tight"><span class="nw">{ type: "function", function: { name: "check_stock",</span>                        <span class="dim">// tools 배열에 하나 더</span>
+<span class="nw">  description: "부품번호로 지금 창고 재고 수량과 입고 예정일을 조회한다. 정비에 필요한 부품이 충분한지 확인할 때 쓴다. 부품마다 한 번씩 부른다.",</span>
+<span class="nw">  parameters: { type: "object", properties: { part_no: { type: "string", description: "부품번호. 예: PN-4471" } }, required: ["part_no"] } } },</span>
+<span class="nw">function checkStock(part_no: string) {</span>                                         <span class="dim">// 도구 함수: 실습 4 와 같은 모양</span>
+<span class="nw">  return stock[part_no] ? { part_no, ...stock[part_no] } : { error: `'${part_no}' 는 재고 시스템에 없는 부품번호 (조회 실패)` };</span>
+<span class="nw">}</span>
+<span class="nw">function runTool(name: string, args: any) {</span>                                   <span class="dim">// 도구가 둘이라 이름으로 고른다</span>
+<span class="nw">  if (name === "get_maintenance_plan") return getMaintenancePlan(args.tail_no);</span>
+<span class="nw">  if (name === "check_stock") return checkStock(args.part_no);</span>
+<span class="nw">  return { error: `모르는 도구: ${name}` };</span>                          <span class="dim">// 실패도 결과로 돌려준다</span>
+<span class="nw">}</span>
+<span class="nw">for (let step = 1; ; step++) {</span>
+  const reply = await chat(messages, tools);  messages.push(reply);
   <span class="nw">if (!reply.tool_calls?.length) { console.log("[답]  ", reply.content); break; }</span>        <span class="dim">// ① 모델이 "끝"</span>
   <span class="nw">if (step >= MAX_STEPS) { console.log(`[STOP] 모델을 ${step}번 불렀다`); break; }</span>       <span class="dim">// ② 내 코드가 "그만"</span>
-  for (const call of reply.tool_calls) {
-    const result = <span class="nw">runTool(call.function.name, JSON.parse(call.function.arguments));</span>
-    messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
-  }
+  <span class="nw">for (const call of reply.tool_calls) {</span>                                        <span class="dim">// 요청이 여러 개 올 수 있다</span>
+    <span class="nw">const result = runTool(call.function.name, JSON.parse(call.function.arguments));</span>
+    <span class="nw">messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });</span>
+  <span class="nw">}</span>
 <span class="nw">}</span></pre></div></div>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
 </section>
 
 <section class="slide">
-  <h1>실습 5 · 내 도구 만들기</h1>
-  <div class="body task"><p class="q">PN-7730 은 번호가 바뀐 부품이다. <b>find_substitute</b> 도구를 직접 설계해 더하세요 · 질문은 실습 4 그대로</p>
+  <h1>실습 6 · 대체품 도구</h1>
+  <div class="body task"><p class="q">PN-7730 은 번호가 바뀐 부품이다. <b>find_substitute</b> 도구를 직접 설계해 더하세요 · 질문은 실습 5 그대로</p>
 <div class="give">
-<div class="c"><small>할 일</small><p>① 이름 · 설명 · 입력 모양 · 실행 함수 (<code>data/substitutes.json</code>) · runTool 한 줄</p><p>② 루프는 그대로. <b>설명을 어떻게 쓰면 모델이 알아서 쓸까</b> 가 핵심</p></div>
+<div class="c"><small>할 일</small><p>① 이름 · 설명 · 입력 모양 · 실행 함수 (<code>data/substitutes.json</code>) · runTool 한 줄</p><p>② 루프는 그대로. 설명을 어떻게 쓰면 모델이 <b>실패를 보고</b> 알아서 부를까</p></div>
 <div class="c"><small>성공하면</small><pre>[TOOL] check_stock({"part_no": "PN-7730"}) → {"error":"… 조회 실패"}
 [TOOL] find_substitute({"part_no": "PN-7730"}) → {"대체품":"PN-7731", …}
 [TOOL] check_stock({"part_no": "PN-7731"}) → {"재고":3}
 [답]   PN-7730 → 대체품 PN-7731, 재고 3개 (충분) · PN-4471 만 부족</pre></div>
 </div>
-<div class="ans"><span>정답 · lab/am/answers/5.ts</span><pre><span class="nw">{
-  type: "function",
-  function: {
-    name: "find_substitute",
-    description: "재고 조회에 실패한 부품번호의 대체품(바뀐 부품번호)을 찾는다. 대체품이 있으면 그 번호로 다시 재고를 확인한다.",
-    parameters: { type: "object", properties: { part_no: { type: "string", description: "조회에 실패한 부품번호. 예: PN-7730" } }, required: ["part_no"] },
-  },
-},</span>                                                   <span class="dim">// ↑ tools 배열에 하나 더</span>
+<div class="ans"><span>정답 · lab/am/answers/6.ts</span><pre class="tight"><span class="nw">import substituteData from "../data/substitutes.json" with { type: "json" };</span>
+<span class="nw">const substitutes: Record&lt;string, any&gt; = substituteData;</span>
 
-<span class="dim">// runTool 에 한 줄 더</span>
-<span class="nw">if (name === "find_substitute")
-  return substitutes[args.part_no] ? { part_no: args.part_no, ...substitutes[args.part_no] } : { 결과: `'${args.part_no}' 의 대체품이 없습니다` };</span>
+<span class="nw">{ type: "function", function: { name: "find_substitute",</span>                         <span class="dim">// tools 배열에 하나 더</span>
+<span class="nw">  description: "재고 조회에 실패한(error) 부품번호의 대체품(바뀐 부품번호)을 찾는다. 대체품이 있으면 그 번호로 다시 재고를 확인한다. 재고가 모자란 부품에는 쓰지 않는다.",</span>
+<span class="nw">  parameters: { type: "object", properties: { part_no: { type: "string", description: "조회에 실패한 부품번호. 예: PN-7730" } }, required: ["part_no"] } } },</span>
+
+<span class="nw">function findSubstitute(part_no: string) {</span>                                     <span class="dim">// 도구 함수: 앞의 둘과 같은 모양</span>
+<span class="nw">  return substitutes[part_no] ? { part_no, ...substitutes[part_no] } : { 결과: `'${part_no}' 의 대체품이 없습니다` };</span>
+<span class="nw">}</span>
+
+  <span class="nw">if (name === "find_substitute") return findSubstitute(args.part_no);</span>           <span class="dim">// runTool 에 한 줄 더</span>
 
 <span class="dim">// 루프는 한 글자도 안 바뀐다. 무엇을 언제 부를지는 모델이 설명을 보고 정한다</span></pre></div></div>
+  <footer><span class="blk">실습</span><span class="num"></span></footer>
+</section>
+
+<section class="slide">
+  <h1>실습 7 · 사람 승인</h1>
+  <div class="body task"><p class="q">모자라는 부품은 <b>request_part</b> 로 청구하게 하고, 청구 직전에 사람에게 y / n 을 물으세요 · 질문은 실습 5 그대로</p>
+<div class="give">
+<div class="c"><small>할 일</small><p>① <code>request_part</code> 도구 · 청구번호 함수 · system 에 청구 지시 · <code>find_substitute</code> 는 주석</p><p>② runTool 에서 청구 직전에 y / n · 거절하면 실행 않고 그 사실을 결과로</p></div>
+<div class="c"><small>성공하면</small><pre>[TOOL] check_stock({"part_no": "PN-7731"}) → {"재고":3}
+[사람] PN-4471 1개를 청구할까요? (y/n) y
+[TOOL] request_part({"part_no":"PN-4471","qty":1}) → {"청구번호":"REQ-0001", …}
+[답]   … PN-4471 1개 청구 접수 (REQ-0001)
+<span class="dim">n 이면 → {"결과":"담당자가 청구를 승인하지 않았습니다"}</span></pre></div>
+</div>
+<div class="ans"><span>정답 · lab/am/answers/7.ts</span><pre class="tight tighter"><span class="nw">import readline from "node:readline/promises";</span>                                  <span class="dim">// tools 의 find_substitute 는 주석 처리 (청구와 헷갈리지 않게)</span>
+<span class="nw">{ type: "function", function: { name: "request_part",</span>                           <span class="dim">// tools 배열에 하나 더</span>
+<span class="nw">  description: "재고를 확인한 뒤, 정비일까지 모자라는 부품을 모자라는 수량만큼 상급 부대에 청구한다. 입고 예정일이 정비일보다 늦으면 모자라는 것이다. …",</span>
+<span class="nw">  parameters: { type: "object", properties: { part_no: { type: "string" }, qty: { type: "number", description: "청구할 수량" } }, required: ["part_no", "qty"] } } },</span>
+<span class="nw">let requests = 0;</span>
+<span class="nw">function requestPart(part_no: string, qty: number) {</span>                           <span class="dim">// 도구 함수: 청구번호를 하나씩 매긴다</span>
+<span class="nw">  return { 청구번호: `REQ-${String(++requests).padStart(4, "0")}`, 부품번호: part_no, 수량: qty, 상태: "청구 접수" };</span>
+<span class="nw">}</span>
+<span class="nw">async function ask(question: string) {</span>                                         <span class="dim">// 사람에게 y / n 을 묻는다</span>
+<span class="nw">  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });</span>
+<span class="nw">  const answer = await rl.question(`[사람] ${question} (y/n) `);  rl.close();</span>
+<span class="nw">  return answer.trim().toLowerCase() === "y";</span>
+<span class="nw">}</span>
+<span class="nw">async</span> function runTool(name: string, args: any) {                             <span class="dim">// 사람을 기다려야 해서 async</span>
+  <span class="nw">if (name === "request_part") {</span>                                           <span class="dim">// 앞의 if 들은 그대로</span>
+    <span class="nw">if (!(await ask(`${args.part_no} ${args.qty}개를 청구할까요?`))) return { 결과: "담당자가 청구를 승인하지 않았습니다" };</span>  <span class="dim">// 거절하면 실행 안 함</span>
+    <span class="nw">return requestPart(args.part_no, args.qty);</span>
+  <span class="nw">}</span>
+}
+    const result = <span class="nw">await</span> runTool(call.function.name, JSON.parse(call.function.arguments));     <span class="dim">// 루프는 await 하나만</span></pre></div></div>
   <footer><span class="blk">실습</span><span class="num"></span></footer>
 </section>
 
