@@ -317,13 +317,13 @@ pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:bl
 <div class="give">
 <div class="c"><small>할 일</small><p>① orderNode 의 <code>// 실습 20</code> 자리: <code>const reply = interrupt({ request: … })</code>. y 면 <code>runCalls(state)</code>, 아니면 담당자 의견을 도구 결과로 돌려준다</p><p>② 아래쪽 <code>// 실습 20</code> 자리: next 에 order 가 있는 동안 <code>getState(thread1).tasks</code> 의 <code>interrupts</code> 에서 청구 내용을 꺼내 찍고, 답을 <code>run(new Command({ resume: answer }))</code></p></div>
 <div class="c"><small>성공하면</small><pre>[NODE] ▶ order
-[STREAM] agent → messages · steps  (도구 요청 request_part)
+[STREAM] agent → [바꾼 필드] messages · steps  (도구 요청 request_part)
 [STREAM] ⏸ 멈춤
 [멈춤] request_part {&quot;part_no&quot;:&quot;PN-4471&quot;,&quot;qty&quot;:1}
 청구할까요? (y / 아니면 담당자 의견) y
 [NODE] ▶ order
 [TOOL] request_part(…) → {&quot;청구번호&quot;:&quot;REQ-0001&quot;, …}
-[STREAM] order → messages · facts · stock
+[STREAM] order → [바꾼 필드] messages · facts · stock
 
 <span class="dim">[NODE] ▶ order 가 두 번: 이어 갈 때 노드가 처음부터 다시 돌았다</span></pre></div>
 </div>
@@ -380,12 +380,12 @@ await answerPauses();             // 실습 20 의 while 을 함수로</span></p
   <div class="body task"><p class="q">재고 보고서를 <b>따로 그래프로</b> 만들어, 답 다음 <b>노드로 꽂으세요</b>. 자식 안의 단계까지 찍습니다</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① <code>// 실습 22</code> 자식 그래프 자리: <code>ReportState</code> (question · stock · rows · report) 와 노드 <code>compare</code> → <code>format</code>. compile</p><p>② 부모 State · Output 에 <code>report</code>. route 는 답이면 <code>"reporter"</code>, <code>addNode("reporter", reportGraph)</code> · <code>addEdge("reporter", END)</code></p><p>③ stream 에 <code>subgraphs: true</code>. <code>print</code> 가 <code>[어느 그래프인지, 모드, 값]</code> 을 받아 자식 단계는 들여 쓴다</p></div>
-<div class="c"><small>성공하면</small><pre>[STREAM] agent → messages · steps · answer
+<div class="c"><small>성공하면</small><pre>[STREAM] agent → [바꾼 필드] messages · steps · answer
 [NODE]   ▶ reporter · compare
 [NODE]   ▶ reporter · format
-[STREAM]   └ compare → rows
-[STREAM]   └ format → report
-[STREAM] reporter → question · stock · report
+[STREAM]   └ compare → [바꾼 필드] rows
+[STREAM]   └ format → [바꾼 필드] report
+[STREAM] reporter → [바꾼 필드] question · stock · report
 [보고서]
 PN-2208          유압 필터 · 필요 1 · 재고 5
 PN-4471          브레이크 패드 · 필요 2 · 재고 1 → 1개 부족
