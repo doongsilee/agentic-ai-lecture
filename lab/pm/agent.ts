@@ -2,7 +2,7 @@
  * 1일차 오후 실습 · 정비 부품 담당 Agent 를 LangGraph 로
  *
  * 오전에 만든 Agent 를 그래프로 다시 만든다. 이 파일 하나를 실습 8 ~ 11 마다 키워 간다
- *   돌리기   pnpm lab <실습 번호>   (예: pnpm lab 8)
+ *   돌리기   pnpm lab <실습 번호>   (예: pnpm lab 8 · 실습 11 은 pnpm lab 11 --limit 도)
  *   문제     강의 장표
  *   막히면   GitHub 의 answers 브랜치 → lab/pm/answers/8.ts ~ 11.ts (그 실습을 끝낸 시점의 이 파일)
  *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 import { Annotation, StateGraph, START, END } from "@langchain/langgraph"; // 실습에서 쓴다
 import { API_KEY, BASE_URL, MODEL } from "../lib/env.js";
 
-const MAX_STEPS = 8; // 모델을 부르는 상한. 1 로 바꿔 돌리면 [STOP] 으로 끝나는 걸 볼 수 있다
+const MAX_STEPS = Number(process.env.MAX_STEPS ?? 8);
 
 // ── 오전에 만든 것 + 대체품 도구 find_substitute: 도구 세 개 · runTool · chat() ──
 const tools = [
@@ -125,6 +125,7 @@ const input = {
       role: "user",
       content: "TR-1023 다음 주 정기 정비에 필요한 부품, 재고 다 있어?",
     },
+    // { role: "user", content: "너는 어떤 에이젼트야?" },
   ],
 };
 
@@ -132,7 +133,7 @@ const input = {
 function show(out: { messages: any[] }) {
   const last = out.messages.at(-1);
   if (last.role === "assistant" && !last.tool_calls?.length)
-    console.log("[답]  ", last.content);
+    console.log(`[답]  ${JSON.stringify(last.content, null, 2)}`);
   else
     console.log(
       `[끝]   마지막 메시지: ${last.role}${last.tool_calls?.length ? " (도구 요청)" : ""} · messages ${out.messages.length}개`,
@@ -143,7 +144,52 @@ function show(out: { messages: any[] }) {
 //   State 는 messages 칸 하나 — 노드가 돌려준 메시지를 이어 붙인다 (reducer)
 //   다 만들면 show(await graph.invoke(input)) 로 돌린다
 
-console.log("그래프가 아직 없다. 실습 8 부터 —", {
-  질문: input.messages[1].content,
-  도구: tools.map((t) => t.function.name),
+const State = Annotation.Root({
+  messages: Annotation<any[]>({
+    reducer: (prev, next) => [...prev, ...next],
+    default: () => [],
+  }),
 });
+
+async function agentNode(state: typeof State.State) {
+  console.log("[NODE] ▶ agent");
+  return { messages: [await chat(state.messages)] };
+}
+
+function toolsNode(state: typeof State.State) {
+  console.log("[NODE] ▶ tools");
+  const calls = state.messages.at(-1).tool_calls;
+  return {
+    messages: calls.map((call: any) => {
+      const result = runTool(
+        call.function.name,
+        JSON.parse(call.function.arguments),
+      );
+      console.log(
+        `[TOOL] ${call.function.name}(${call.function.arguments}) →`,
+        JSON.stringify(result, null, 2),
+      );
+      return {
+        role: "tool",
+        tool_call_id: call.id,
+        content: JSON.stringify(result, null, 2),
+      };
+    }),
+  };
+}
+
+function route(state: typeof State.State) {
+  return state.messages.at(-1).tool_calls?.length ? "tools" : END;
+}
+
+const graph = new StateGraph(State)
+  .addNode("agent", agentNode)
+  .addNode("tools", toolsNode)
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", route, ["tools", END])
+  .addEdge("tools", "agent")
+  .compile();
+
+show(await graph.invoke(input));
+
+// console.log("그래프가 아직 없다. 실습 8 부터 —", { 질문: input.messages[1].content, 도구: tools.map((t) => t.function.name) });

@@ -1,11 +1,7 @@
 /**
- * 1일차 오후 ③ 실습 · 시작 파일 — 정비 부품 Agent (오후 ② 의 facts · stock · 기억 · 입구와 출구까지)
- *
- * 오후 ③ 은 모두 이 파일에서 시작한다. "// 실습 16" ~ "// 실습 19" 자리에 코드를 넣는다
- *   돌리기   pnpm lab <실습 번호>   (예: pnpm lab 16 · 실습 18 부터 readline 으로 물으니 터미널에서 직접 돌린다)
- *   문제     강의 장표
- *   막히면   GitHub 의 answers 브랜치 → lab/pm/answers/16.ts ~ 19.ts
- *   따라잡기 pnpm step <실습 번호>   (그 실습을 풀 차례로. 앞 실습의 정답이 이 파일에 들어간다)
+ * 실습 17 정답 · 토큰 스트리밍 — 실습 17 을 끝낸 시점의 lab/pm/agent3.ts
+ *   chat() 을 stream: true 로 부르고, 응답은 lib 의 readStream 으로 읽는다. agent 노드는 받은 토큰을 config.writer 로 흘려보낸다
+ *   부르는 쪽은 streamMode: ["updates", "custom"]. updates 면 진행 상황, custom 이면 토큰을 줄바꿈 없이 찍는다
  */
 import { readFileSync } from "node:fs";
 import readline from "node:readline/promises"; // 실습 18 에서 쓴다 (사람에게 묻기)
@@ -107,22 +103,24 @@ function runTool(name: string, args: any) {
   return { error: `모르는 도구: ${name}` };
 }
 
-// 실습 17: onToken 을 받고, body 에 stream: true, 응답은 readStream(res, onToken) 으로 읽는다
-async function chat(messages: object[]) {
+// stream: true 로 부르면 답이 토큰 단위로 온다. 읽는 일은 lib 의 readStream 이 한다 (글자는 onToken 으로, 다 모이면 chat() 과 같은 모양)
+async function chat(messages: object[], onToken?: (token: string) => void) {
+  console.log(`[LLM]  보낸 messages ${messages.length}개`);
   const res = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${API_KEY}`,
     },
-    body: JSON.stringify({ model: MODEL, messages, tools, temperature: 0.2 }),
+    body: JSON.stringify({
+      model: MODEL,
+      messages,
+      tools,
+      temperature: 0.2,
+      stream: true,
+    }),
   });
-  const data = await res.json();
-  console.log(
-    `[LLM]  보낸 messages ${messages.length}개 · 입력 토큰 ${data.usage.prompt_tokens}`,
-  );
-  const { role, content, tool_calls } = data.choices[0].message;
-  return { role, content, tool_calls };
+  return readStream(res, onToken);
 }
 
 const input = {
@@ -192,10 +190,12 @@ function askNode(state: typeof State.State) {
 }
 
 // ── 노드 ① agent: 모델을 부른다 ──
-async function agentNode(state: typeof State.State) {
-  // 실습 17: config 도 받아서, 받은 토큰을 config.writer 로 흘려보낸다
+async function agentNode(
+  state: typeof State.State,
+  config: LangGraphRunnableConfig,
+) {
   console.log("[NODE] ▶ agent");
-  const reply = await chat(state.messages);
+  const reply = await chat(state.messages, (token) => config.writer?.(token)); // 받은 토큰을 그래프 밖으로 흘려보낸다
   return {
     messages: [reply],
     steps: 1,
@@ -261,17 +261,45 @@ const graph = new StateGraph(State, { input: Input, output: Output })
   .addEdge("tools", "agent")
   .compile({ checkpointer: new MemorySaver() }); // 단계마다 State 를 저장한다. 실습 18: interruptBefore 로 order 앞에서 멈춘다
 
+// ── 진행 상황: 노드가 끝날 때마다 그 노드 이름과 바꾼 필드를 찍는다 ──
+function progress(chunk: Record<string, any>) {
+  for (const [node, update] of Object.entries(chunk)) {
+    const asked = update.messages
+      ?.at(-1)
+      ?.tool_calls?.map((c: any) => c.function.name);
+    console.log(
+      `[STREAM] ${node.padEnd(5)} → ${Object.keys(update).join(" · ")}${asked?.length ? `  (도구 요청 ${asked.join(", ")})` : ""}`,
+    );
+  }
+}
+
+// ── 받은 값 찍기: updates 면 진행 상황, custom 이면 모델이 쓰는 토큰 (줄바꿈 없이 이어서) ──
+let writing = false; // 지금 토큰이 흘러나오는 중인가
+function print([mode, value]: [string, any]) {
+  if (mode === "custom") {
+    if (!writing) process.stdout.write("[토큰] ");
+    writing = true;
+    process.stdout.write(value);
+    return;
+  }
+  if (writing) process.stdout.write("\n");
+  writing = false;
+  progress(value);
+}
+
 const thread1 = { configurable: { thread_id: "1" } };
-// 실습 16: invoke 를 stream (streamMode "updates") 으로 바꾸고, 받을 때마다 [STREAM] 노드 → [바꾼 필드] 필드 이름들 을 찍는다. 답 · 재고표는 getState(thread1).values 에서
-// 실습 17: streamMode ["updates", "custom"] — custom 이면 토큰을 줄바꿈 없이 찍는다
 // 실습 18: 첫 질문 하나만 묻고, getState(thread1).next 에 order 가 있으면 청구 내용을 찍고 readline 으로 y / n 을 묻는다. y 면 stream(null, …) 로 이어 간다
 // 실습 19: y 가 아니면 담당자 의견을 도구 결과로 updateState(thread1, { messages }, "order") 로 넣고 이어 간다
 for (const question of [
   input.messages[1].content,
   "부족한 부품은 언제 들어와?",
 ]) {
-  const out = await graph.invoke({ question }, thread1);
-  console.log("[OUT] ", Object.keys(out));
-  console.log("[답]  ", out.answer);
-  console.log("[재고]", out.stock);
+  for await (const out of await graph.stream(
+    { question },
+    { ...thread1, streamMode: ["updates", "custom"] as const },
+  ))
+    print(out);
+  const { answer, stock } = (await graph.getState(thread1)).values; // 다 돈 뒤의 State
+  console.log("[답]  ", answer);
+  console.log("[재고]", stock);
 }

@@ -154,6 +154,7 @@ const State = Annotation.Root({
     default: () => 0,
   }), // 모델을 부른 횟수 — 더한다
   // 실습 12: facts 필드 (도구로 확인한 사실) · 실습 13: stock 필드 (부품별 재고표) · 실습 15: question · answer 필드
+  facts: Annotation<string[]>(),
 });
 
 // 실습 15: 입구 Input · 출구 Output, 그리고 질문을 대화에 넣는 ask 노드를 여기에 만든다
@@ -168,22 +169,31 @@ async function agentNode(state: typeof State.State) {
 function toolsNode(state: typeof State.State) {
   console.log("[NODE] ▶ tools");
   const calls = state.messages.at(-1).tool_calls;
+
+  const results = calls.map((call: any) => {
+    const result = runTool(
+      call.function.name,
+      JSON.parse(call.function.arguments),
+    );
+    console.log(
+      `[TOOL] ${call.function.name}(${call.function.arguments}) →`,
+      JSON.stringify(result, null, 2),
+    );
+    return {
+      call,
+      result,
+    };
+  });
   return {
-    messages: calls.map((call: any) => {
-      const result = runTool(
-        call.function.name,
-        JSON.parse(call.function.arguments),
-      );
-      console.log(
-        `[TOOL] ${call.function.name}(${call.function.arguments}) →`,
-        JSON.stringify(result, null, 2),
-      );
-      return {
-        role: "tool",
-        tool_call_id: call.id,
-        content: JSON.stringify(result),
-      };
-    }),
+    messages: results.map(({ call, result }: any) => ({
+      role: "tool",
+      tool_call_id: call.id,
+      content: JSON.stringify(result),
+    })),
+    facts: results.map(
+      ({ call, result }: any) =>
+        `${call.function.name} ${call.function.arguments} → ${JSON.stringify(result)}`,
+    ),
     // 실습 12: 도구 결과마다 한 줄씩 facts 로도 · 실습 13: 재고가 나온 결과는 { [part_no]: 재고 } 로 stock 에도
   };
 }
@@ -210,7 +220,12 @@ const graph = new StateGraph(State) // 실습 15: { input: Input, output: Output
   .addEdge("tools", "agent")
   .compile(); // 실습 14: checkpointer 를 단다
 
-show(await graph.invoke(input));
+const out = await graph.invoke(input);
+show(out);
+console.log(`[STATE] facts ${out.facts.length}개`);
+for (const f of out.facts)
+  console.log("        ·", f.length > 90 ? f.slice(0, 90) + " …" : f);
+
 // 실습 12 · 13: invoke 결과에서 facts · stock 도 찍는다
 // 실습 14: thread_id 를 주고 invoke, 같은 thread 로 "부족한 부품은 언제 들어와?" 를 이어서 묻는다. thread_id "2" 로도 물어 본다
 // 실습 15: invoke({ question }, thread1) 로 바꿔 두 번 묻고, 나온 필드 이름(Object.keys)과 답 · 재고표를 찍는다

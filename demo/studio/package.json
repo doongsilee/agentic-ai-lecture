@@ -1,0 +1,25 @@
+{
+  "name": "agentic-ai-day1-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "1일차 오후 시연 그래프를 LangGraph Studio 에서 보기 (강사 PC 전용)",
+  "type": "module",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "studio": "langgraphjs dev --port 2024",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@langchain/core": "1.2.14",
+    "@langchain/langgraph": "1.4.18",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@langchain/langgraph-cli": "1.5.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

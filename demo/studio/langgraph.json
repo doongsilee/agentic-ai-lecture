@@ -1,0 +1,33 @@
+{
+  "_notice": "1일차 오후 시연 그래프를 LangGraph Studio 에서 보기 (강사 PC 전용). cd demo/studio && pnpm studio — 브라우저에서 LangSmith 로그인 필요. env 는 강사 시연용 LangSmith 설정(demo/.env)이고, 모델 접속 정보는 lab/.env 에서 읽는다",
+  "node_version": "22",
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "simple": "./pm1.ts:simple",
+    "chain": "./pm1.ts:chain",
+    "router": "./pm1.ts:router",
+    "agent": "./pm1.ts:agent",
+    "pm2-email": "./pm2.ts:email",
+    "pm2-revise": "./pm2.ts:revise",
+    "pm2-two-analyzers-error": "./pm2.ts:twoAnalyzersError",
+    "pm2-two-analyzers-reducer": "./pm2.ts:twoAnalyzersReducer",
+    "pm2-wordbook": "./pm2.ts:wordbook",
+    "pm2-messages": "./pm2.ts:messages",
+    "pm2-private-state": "./pm2.ts:privateState",
+    "pm2-input-output": "./pm2.ts:inputOutput",
+    "pm2-typo": "./pm2.ts:typo",
+    "pm2-send-all": "./pm2.ts:sendAll",
+    "pm2-send-recent": "./pm2.ts:sendRecent",
+    "pm2-summary": "./pm2.ts:summary",
+    "pm3-stream": "./pm3.ts:stream",
+    "pm3-approve": "./pm3.ts:approve",
+    "pm3-edit": "./pm3.ts:edit",
+    "pm3-feedback": "./pm3.ts:feedback",
+    "pm4-interrupt": "./pm4.ts:interruptAgent",
+    "pm4-dictionary": "./pm4.ts:dictionary",
+    "pm4-subgraph": "./pm4.ts:subgraph"
+  },
+  "env": "../.env"
+}
