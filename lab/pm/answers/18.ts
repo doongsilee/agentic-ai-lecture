@@ -302,7 +302,7 @@ function progress(chunk: Record<string, any>) {
       ?.at(-1)
       ?.tool_calls?.map((c: any) => c.function.name);
     console.log(
-      `[STREAM] ${node.padEnd(5)} → ${Object.keys(update).join(" · ")}${asked?.length ? `  (도구 요청 ${asked.join(", ")})` : ""}`,
+      `[STREAM] ${node.padEnd(5)} → [바꾼 필드] ${Object.keys(update).join(" · ")}${asked?.length ? `  (도구 요청 ${asked.join(", ")})` : ""}`,
     );
   }
 }

@@ -262,7 +262,7 @@ const graph = new StateGraph(State, { input: Input, output: Output })
   .compile({ checkpointer: new MemorySaver() }); // 단계마다 State 를 저장한다. 실습 18: interruptBefore 로 order 앞에서 멈춘다
 
 const thread1 = { configurable: { thread_id: "1" } };
-// 실습 16: invoke 를 stream (streamMode "updates") 으로 바꾸고, 받을 때마다 [STREAM] 노드 → 바꾼 필드를 찍는다. 답 · 재고표는 getState(thread1).values 에서
+// 실습 16: invoke 를 stream (streamMode "updates") 으로 바꾸고, 받을 때마다 [STREAM] 노드 → [바꾼 필드] 필드 이름들 을 찍는다. 답 · 재고표는 getState(thread1).values 에서
 // 실습 17: streamMode ["updates", "custom"] — custom 이면 토큰을 줄바꿈 없이 찍는다
 // 실습 18: 첫 질문 하나만 묻고, getState(thread1).next 에 order 가 있으면 청구 내용을 찍고 readline 으로 y / n 을 묻는다. y 면 stream(null, …) 로 이어 간다
 // 실습 19: y 가 아니면 담당자 의견을 도구 결과로 updateState(thread1, { messages }, "order") 로 넣고 이어 간다
