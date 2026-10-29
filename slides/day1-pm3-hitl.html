@@ -328,13 +328,13 @@ pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:bl
   <h1>실습 16 · 진행 상황 보기</h1>
   <div class="body task"><p class="q"><b>invoke 대신 stream</b> 으로 부르세요. 노드가 끝날 때마다 노드 이름과 그 노드가 바꾼 필드를 찍습니다</p>
 <div class="give">
-<div class="c"><small>할 일</small><p>① <code>graph.invoke({ question }, thread1)</code> 을 <code>for await (const chunk of await graph.stream({ question }, { ...thread1, streamMode: "updates" }))</code> 로</p><p>② 받을 때마다 <code>[STREAM] 노드 → 필드들</code> 을 찍는다. agent 가 도구를 요청했으면 도구 이름도</p><p>③ 다 돈 뒤 답과 재고표는 <code>(await graph.getState(thread1)).values</code> 에서 꺼낸다</p></div>
-<div class="c"><small>성공하면</small><pre>[STREAM] ask   → messages
-[STREAM] agent → messages · steps  (도구 요청 get_maintenance_plan)
-[STREAM] tools → messages · facts · stock
-[STREAM] agent → messages · steps  (도구 요청 check_stock, …)
+<div class="c"><small>할 일</small><p>① <code>graph.invoke({ question }, thread1)</code> 을 <code>for await (const chunk of await graph.stream({ question }, { ...thread1, streamMode: "updates" }))</code> 로</p><p>② 받을 때마다 <code>[STREAM] 노드 → [바꾼 필드] 필드들</code> 을 찍는다. agent 가 도구를 요청했으면 도구 이름도</p><p>③ 다 돈 뒤 답과 재고표는 <code>(await graph.getState(thread1)).values</code> 에서 꺼낸다</p></div>
+<div class="c"><small>성공하면</small><pre>[STREAM] ask   → [바꾼 필드] messages
+[STREAM] agent → [바꾼 필드] messages · steps  (도구 요청 get_maintenance_plan)
+[STREAM] tools → [바꾼 필드] messages · facts · stock
+[STREAM] agent → [바꾼 필드] messages · steps  (도구 요청 check_stock, …)
   …
-[STREAM] agent → messages · steps · answer
+[STREAM] agent → [바꾼 필드] messages · steps · answer
 [답]   TR-1023 … PN-4471 브레이크 패드 1개 부족 …
 
 <span class="dim">[NODE] · [TOOL] 은 노드 안의 로그, [STREAM] 은 부른 쪽이 받은 것</span></pre></div>
@@ -342,7 +342,7 @@ pre.diff .del{color:#F08B8B;display:block}pre.diff .add{color:#8BE0A4;display:bl
 <div class="ans"><span>정답 · lab/pm/answers/16.ts</span><pre><span class="nw">function progress(chunk: Record&lt;string, any&gt;) {
   for (const [node, update] of Object.entries(chunk)) {
     const asked = update.messages?.at(-1)?.tool_calls?.map((c: any) =&gt; c.function.name);
-    console.log(`[STREAM] ${node.padEnd(5)} → ${Object.keys(update).join(&quot; · &quot;)}${asked?.length ? `  (도구 요청 ${asked.join(&quot;, &quot;)})` : &quot;&quot;}`);
+    console.log(`[STREAM] ${node.padEnd(5)} → [바꾼 필드] ${Object.keys(update).join(&quot; · &quot;)}${asked?.length ? `  (도구 요청 ${asked.join(&quot;, &quot;)})` : &quot;&quot;}`);
   }
 }</span>
 
@@ -363,11 +363,11 @@ for (const question of [input.messages[1].content, &quot;부족한 부품은 언
 <div class="c"><small>할 일</small><p>① <code>chat()</code> 의 body 에 <code>stream: true</code>. 응답은 <code>return readStream(res, onToken)</code> — SSE 를 읽는 일은 <code>lib/llm.ts</code> 에 준비돼 있다</p><p>② <code>agentNode(state, config)</code> 에서 <code>chat(state.messages, (token) => config.writer?.(token))</code></p><p>③ <code>streamMode: ["updates", "custom"]</code>. 받은 값은 <code>[모드, 값]</code>. custom 이면 <code>process.stdout.write(값)</code>, updates 면 실습 16 처럼</p></div>
 <div class="c"><small>성공하면</small><pre>[NODE] ▶ agent
 [LLM]  보낸 messages 13개
-[STREAM] tools → messages · facts · stock
+[STREAM] tools → [바꾼 필드] messages · facts · stock
 [토큰] TR-1023 다음 정기 정비는 200시간 정기 점검, 2026-11-03 입니다.
 - 유압 필터 PN-2208: 필요 1 · 재고 5 → 충분
   …
-[STREAM] agent → messages · steps · answer
+[STREAM] agent → [바꾼 필드] messages · steps · answer
 [답]   TR-1023 다음 정기 정비는 …
 
 <span class="dim">[토큰] 줄은 글자가 써지는 대로 늘어난다. [답] 은 다 돈 뒤 getState 에서 꺼낸 같은 답</span></pre></div>
@@ -395,14 +395,14 @@ async function agentNode(state: typeof State.State, <span class="nw">config: Lan
   <div class="body task"><p class="q">청구 도구 <b>request_part</b> 를 더하고, 청구 요청은 <b>order</b> 노드로 보내 그 앞에서 멈추세요. 멈추면 청구 내용을 보여 주고 y / n 을 묻습니다</p>
 <div class="give">
 <div class="c"><small>할 일</small><p>① <code>request_part</code> 도구 설명과 runTool 한 줄을 더한다 (lab/README.md 에서 복사). system 메시지에 "정비일까지 모자라는 부품은 request_part 로 청구한다."</p><p>② tools 노드의 본문을 <code>runCalls</code> 로 빼고, 그걸 부르는 <code>orderNode</code> 를 하나 더. route 는 청구 요청이면 <code>"order"</code></p><p>③ <code>compile({ checkpointer, interruptBefore: ["order"] })</code>. 이번엔 첫 질문 하나만 묻는다</p><p>④ 다 돈 뒤 <code>getState(thread1).next</code> 에 order 가 있으면 tool_calls 를 찍고 readline 으로 묻는다. y 면 <code>stream(null, …)</code></p></div>
-<div class="c"><small>성공하면</small><pre>[STREAM] agent → messages · steps  (도구 요청 request_part)
+<div class="c"><small>성공하면</small><pre>[STREAM] agent → [바꾼 필드] messages · steps  (도구 요청 request_part)
 [STREAM] ⏸ 멈춤
 [멈춤] request_part {&quot;part_no&quot;:&quot;PN-4471&quot;,&quot;qty&quot;:1}
 청구할까요? (y/n) y
 [NODE] ▶ order
 [TOOL] request_part(…) → {&quot;청구번호&quot;:&quot;REQ-0001&quot;, …}
-[STREAM] order → messages · facts · stock
-[STREAM] agent → messages · steps · answer
+[STREAM] order → [바꾼 필드] messages · facts · stock
+[STREAM] agent → [바꾼 필드] messages · steps · answer
 
 <span class="dim">n 이면 &quot;[멈춤] 승인하지 않았다&quot; — 청구 직전에 멈춘 채로 남는다</span></pre></div>
 </div>
@@ -428,7 +428,7 @@ while ((await graph.getState(thread1)).next.includes(&quot;order&quot;)) {
 <div class="c"><small>할 일</small><p>① 묻는 말을 <code>청구할까요? (y / 아니면 담당자 의견)</code> 으로</p><p>② y 가 아니면 <code>updateState(thread1, { messages: [...] }, "order")</code>. 청구 요청마다 <code>role: "tool"</code> 결과로 <code>{ 결과: "청구하지 않았습니다. 담당자 의견: …" }</code></p><p>③ 그다음 <code>run(null)</code>. 다시 청구하면 또 멈춘다 — while 이 그대로 받는다</p></div>
 <div class="c"><small>성공하면</small><pre>[멈춤] request_part {&quot;part_no&quot;:&quot;PN-4471&quot;,&quot;qty&quot;:1}
 청구할까요? (y / 아니면 담당자 의견) 2개만 청구해
-[STREAM] agent → messages · steps  (도구 요청 request_part)
+[STREAM] agent → [바꾼 필드] messages · steps  (도구 요청 request_part)
 [STREAM] ⏸ 멈춤
 [멈춤] request_part {&quot;part_no&quot;:&quot;PN-4471&quot;,&quot;qty&quot;:2}
 청구할까요? (y / 아니면 담당자 의견) y

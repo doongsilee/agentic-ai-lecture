@@ -99,7 +99,7 @@ git show origin/answers:lab/pm/answers/13.ts
 | `[TOOL]` | 내 코드가 도구를 실행했다 (모델이 아니라). 도구 이름(arguments) → 결과 |
 | `[NODE]` | 그래프의 노드가 돌기 시작했다 |
 | `[STATE]` | 그래프 State 의 필드를 찍었다 |
-| `[STREAM]` | stream 으로 받은 진행 상황. 노드 → 바꾼 필드 |
+| `[STREAM]` | stream 으로 받은 진행 상황. `노드 → [바꾼 필드] 필드 이름들` |
 | `[멈춤]` | 그래프가 멈췄다. 사람의 답을 기다린다 |
 | `[STOP]` | 내 코드가 멈췄다 (`MAX_STEPS`) |
 | `[답]` | 모델의 최종 답 |
